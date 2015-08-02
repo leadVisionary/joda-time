@@ -680,5 +680,4 @@ public class TestDateTimeFormatterBuilder extends TestCase {
         }
         assertEquals(expected, out.toString());
     }
-
 }
