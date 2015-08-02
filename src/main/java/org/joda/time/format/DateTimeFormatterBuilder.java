@@ -1310,9 +1310,8 @@ public class DateTimeFormatterBuilder {
                 if (length == 0 && (c == '-' || c == '+') && iSigned) {
                     negative = c == '-';
 
-                    // Next character must be a digit.
-                    if (length + 1 >= limit || 
-                        (c = text.charAt(position + length + 1)) < '0' || c > '9')
+
+                    if (isPastBoundaryOrNotDigit(text, position, limit, length))
                     {
                         break;
                     }
@@ -1363,6 +1362,15 @@ public class DateTimeFormatterBuilder {
 
             bucket.saveField(iFieldType, value);
             return position;
+        }
+
+        private boolean isPastBoundaryOrNotDigit(final CharSequence text, final int position, final int limit, final int length) {
+            final char c;// Next character must be a digit.
+            final char nextCharacter = (c = text.charAt(position + length + 1));
+            final boolean isNotDigit = nextCharacter < '0' || c > '9';
+
+            final boolean isPastBoundary = length + 1 >= limit;
+            return isPastBoundary || isNotDigit;
         }
     }
 
