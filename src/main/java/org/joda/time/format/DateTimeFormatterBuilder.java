@@ -1312,8 +1312,11 @@ public class DateTimeFormatterBuilder {
 
                     // Next character must be a digit.
                     final char nextCharacter = (c = text.charAt(position + length + 1));
-                    if (length + 1 >= limit ||
-                            nextCharacter < '0' || c > '9')
+                    final boolean isNotDigit = nextCharacter < '0' || c > '9';
+
+                    final boolean isPastBoundary = length + 1 >= limit;
+                    final boolean pastBoundaryOrNotDigit = isPastBoundary || isNotDigit;
+                    if (pastBoundaryOrNotDigit)
                     {
                         break;
                     }
