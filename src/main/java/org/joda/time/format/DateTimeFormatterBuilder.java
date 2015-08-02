@@ -1311,8 +1311,9 @@ public class DateTimeFormatterBuilder {
                     negative = c == '-';
 
                     // Next character must be a digit.
-                    if (length + 1 >= limit || 
-                        (c = text.charAt(position + length + 1)) < '0' || c > '9')
+                    final char nextCharacter = (c = text.charAt(position + length + 1));
+                    if (length + 1 >= limit ||
+                            nextCharacter < '0' || c > '9')
                     {
                         break;
                     }
