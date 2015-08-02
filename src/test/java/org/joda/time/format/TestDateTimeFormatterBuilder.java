@@ -680,22 +680,4 @@ public class TestDateTimeFormatterBuilder extends TestCase {
         }
         assertEquals(expected, out.toString());
     }
-
-    /**
-     * https://github.com/JodaOrg/joda-time/issues/86
-     */
-    public void test_fix_issues_86_correctly_parses_plus_in_front_of_year() {
-        // Given: an expected pattern like 20130101
-        final String pattern = "yyyyMMdd";
-        // And: a date that includes + per the ISO8601 spec of allowing it for 5 digit years
-        final String dateTime = "+20130109";
-        // When: I try to parse this date
-        final DateTime result = DateTimeFormat.forPattern(pattern).parseDateTime(dateTime);
-        // Then: I get back the correct year
-        assertEquals(2013, result.getYear());
-        // And: I get back the correct month
-        assertEquals(1, result.getMonthOfYear());
-        // And: I get back the correct day
-        assertEquals(9, result.getDayOfMonth());
-    }
 }
