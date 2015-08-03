@@ -1307,9 +1307,9 @@ public class DateTimeFormatterBuilder {
             int length = 0;
             while (length < limit) {
                 char c = text.charAt(position + length);
-                if (length == 0 && (c == '-' || c == '+') && iSigned) {
+                final boolean isFirstCharacterOperator = length == 0 && (c == '-' || c == '+');
+                if (isFirstCharacterOperator && iSigned) {
                     negative = c == '-';
-
 
                     if (isPastBoundaryOrNotDigit(text, position, limit, length))
                     {
@@ -1326,7 +1326,7 @@ public class DateTimeFormatterBuilder {
                     limit = Math.min(limit + 1, text.length() - position);
                     continue;
                 }
-                if (c < '0' || c > '9') {
+                if (isNotADigit(c)) {
                     break;
                 }
                 length++;
@@ -1364,12 +1364,16 @@ public class DateTimeFormatterBuilder {
             return position;
         }
 
-        private boolean isPastBoundaryOrNotDigit(final CharSequence text, final int position, final int limit, final int length) {
+        private static boolean isPastBoundaryOrNotDigit(final CharSequence text, final int position, final int limit, final int length) {
             final boolean isPastBoundary = length + 1 >= limit;
             if (isPastBoundary) { return true; }
             final char nextCharacter = text.charAt(position + length + 1);
-            final boolean isNotDigit = nextCharacter < '0' || nextCharacter > '9';
+            final boolean isNotDigit = isNotADigit(nextCharacter);
             return isNotDigit;
+        }
+
+        private static boolean isNotADigit(final char c) {
+            return c < '0' || c > '9';
         }
     }
 
