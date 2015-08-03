@@ -1,7 +1,6 @@
 package org.joda.time.format;
 
 import org.joda.time.DateTimeFieldType;
-import org.joda.time.format.DateTimeParserBucket;
 
 final class FastNumberParser {
     private final DateTimeFieldType iFieldType;
@@ -21,17 +20,14 @@ final class FastNumberParser {
                      int position) {
         int limit = Math.min(iMaxParsedDigits, text.length() - position);
 
-        boolean negative = false;
         int length = 0;
+        boolean negative = false;
         while (length < limit) {
             char c = text.charAt(position + length);
             final boolean isFirstCharacterOperator = length == 0 && (c == '-' || c == '+');
-            if (isFirstCharacterOperator && iSigned) {
+            final boolean b = isPastBoundary(limit, length) || isNotADigit(text.charAt(position + length + 1));
+            if (isFirstCharacterOperator && iSigned && !b) {
                 negative = c == '-';
-
-                if (isPastBoundaryOrNotDigit(text, position, limit, length)) {
-                    break;
-                }
 
                 if (negative) {
                     length++;
@@ -68,8 +64,8 @@ final class FastNumberParser {
             if (index > text.length()) {
                 return ~position;
             }
-            value = text.charAt(index) - '0';
             position += length;
+            value = text.charAt(index) - '0';
             while (i < position) {
                 value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
             }
@@ -82,14 +78,8 @@ final class FastNumberParser {
         return position;
     }
 
-    private static boolean isPastBoundaryOrNotDigit(final CharSequence text, final int position, final int limit, final int length) {
-        final boolean isPastBoundary = length + 1 >= limit;
-        if (isPastBoundary) {
-            return true;
-        }
-        final char nextCharacter = text.charAt(position + length + 1);
-        final boolean isNotDigit = isNotADigit(nextCharacter);
-        return isNotDigit;
+    private static boolean isPastBoundary(final int limit, final int length) {
+        return length + 1 >= limit;
     }
 
     private static boolean isNotADigit(final char c) {
