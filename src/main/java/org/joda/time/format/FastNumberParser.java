@@ -23,19 +23,17 @@ final class FastNumberParser {
         int length = 0;
         boolean negative = false;
         while (length < limit) {
-            char c = text.charAt(position + length);
-            final boolean isFirstCharacterOperator = length == 0 && (c == '-' || c == '+');
-            final boolean b = isPastBoundary(limit, length) || isNotADigit(text.charAt(position + length + 1));
-            final boolean b1 = isFirstCharacterOperator && iSigned && !b;
+            final int index = position + length;
+            char c = text.charAt(index);
+            final boolean isPlusOrMinus = c == '-' || c == '+';
+            final boolean isFirstCharacterOperator = length == 0 && isPlusOrMinus;
+            final boolean b = !isPastBoundary(limit, length) && !isNotADigit(text.charAt(index + 1));
+            final boolean b1 = isFirstCharacterOperator && iSigned && b;
             if (b1) {
                 negative = c == '-';
 
-                if (negative) {
-                    length++;
-                } else {
-                    // Skip the '+' for parseInt to succeed.
-                    position++;
-                }
+                length = (negative) ? length + 1 : length;
+                position = (negative) ? position : position + 1;
                 // Expand the limit to disregard the sign character.
                 limit = Math.min(limit + 1, text.length() - position);
             } else {
