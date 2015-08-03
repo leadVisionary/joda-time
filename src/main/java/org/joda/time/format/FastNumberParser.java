@@ -19,8 +19,7 @@ final class FastNumberParser {
     public int parse(final DateTimeParserBucket bucket,
                      final CharSequence text,
                      int position) {
-        final int remainingCharacters = text.length() - position;
-        int limit = Math.min(iMaxParsedDigits, remainingCharacters);
+        int limit = Math.min(iMaxParsedDigits, text.length() - position);
 
         boolean negative = false;
         int length = 0;
@@ -41,7 +40,7 @@ final class FastNumberParser {
                     position++;
                 }
                 // Expand the limit to disregard the sign character.
-                limit = Math.min(limit + 1, remainingCharacters);
+                limit = Math.min(limit + 1, text.length() - position);
                 continue;
             }
             if (isNotADigit(c)) {
