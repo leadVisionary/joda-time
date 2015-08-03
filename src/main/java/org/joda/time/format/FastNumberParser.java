@@ -64,11 +64,12 @@ final class FastNumberParser {
             if (negative) {
                 i++;
             }
-            try {
-                value = text.charAt(i++) - '0';
-            } catch (StringIndexOutOfBoundsException e) {
+
+            final int index = i++;
+            if (index > text.length()) {
                 return ~position;
             }
+            value = text.charAt(index) - '0';
             position += length;
             while (i < position) {
                 value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
