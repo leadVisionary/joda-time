@@ -1365,12 +1365,11 @@ public class DateTimeFormatterBuilder {
         }
 
         private boolean isPastBoundaryOrNotDigit(final CharSequence text, final int position, final int limit, final int length) {
-            final char c;// Next character must be a digit.
-            final char nextCharacter = (c = text.charAt(position + length + 1));
-            final boolean isNotDigit = nextCharacter < '0' || c > '9';
-
             final boolean isPastBoundary = length + 1 >= limit;
-            return isPastBoundary || isNotDigit;
+            if (isPastBoundary) { return true; }
+            final char nextCharacter = text.charAt(position + length + 1);
+            final boolean isNotDigit = nextCharacter < '0' || nextCharacter > '9';
+            return isNotDigit;
         }
     }
 
