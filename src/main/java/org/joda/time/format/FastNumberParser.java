@@ -18,20 +18,11 @@ final class FastNumberParser {
     public int parse(final DateTimeParserBucket bucket,
                      final CharSequence text,
                      int position) {
-        int limit = Math.min(iMaxParsedDigits, text.length() - position);
 
-        boolean negative = false;
-        int length = 0;
-        while (length < limit && (isADigit(text.charAt(position + length)) || prefixedWithPlusOrMinus(text, position, limit, length))) {
-            if (prefixedWithPlusOrMinus(text, position, limit, length)) {
-                negative = text.charAt(position + length) == '-';
-                length = (negative) ? length + 1 : length;
-                position = (negative) ? position : position + 1;
-                // Expand the limit to disregard the sign character.
-                limit = Math.min(limit + 1, text.length() - position);
-            }
-            length = length + 1;
-        }
+
+        final OffsetCalculator offsetCalculator = new OffsetCalculator(text, position).invoke(iMaxParsedDigits, iSigned);
+        final int length = offsetCalculator.getLength();
+        position = offsetCalculator.getPosition();
 
         if (length == 0) {
             return ~position;
@@ -44,7 +35,7 @@ final class FastNumberParser {
             value = Integer.parseInt(text.subSequence(position, position += length).toString());
         } else {
             int i = position;
-            if (negative) {
+            if (offsetCalculator.isNegative()) {
                 i++;
             }
 
@@ -57,7 +48,7 @@ final class FastNumberParser {
             while (i < position) {
                 value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
             }
-            if (negative) {
+            if (offsetCalculator.isNegative()) {
                 value = -value;
             }
         }
@@ -66,22 +57,71 @@ final class FastNumberParser {
         return position;
     }
 
-    private boolean prefixedWithPlusOrMinus(final CharSequence text, final int position, final int limit, final int length) {
-        final int index = position + length;
-        final boolean isFirstCharacterOperator = length == 0 && (text.charAt(index) == '-' || text.charAt(index) == '+');
-        final boolean isNextCharacterADigit = index < text.length() - 1 && isADigit(text.charAt(index + 1));
-        return isFirstCharacterOperator && iSigned && !isPastBoundary(limit, length) && isNextCharacterADigit;
-    }
+    private static class OffsetCalculator {
+        private final CharSequence text;
+        private int position;
+        private int length;
+        private boolean negative;
+        private int limit;
 
-    private static boolean isPastBoundary(final int limit, final int length) {
-        return length + 1 >= limit;
-    }
+        public OffsetCalculator(final CharSequence text,
+                                final int position) {
+            this.text = text;
+            this.position = position;
+            length = 0;
+            negative = false;
+        }
 
-    private static boolean isADigit(final char c) {
-        return !isNotADigit(c);
-    }
+        int getPosition() {
+            return position;
+        }
 
-    private static boolean isNotADigit(final char c) {
-        return c < '0' || c > '9';
+        int getLength() {
+            return length;
+        }
+
+        boolean isNegative() {
+            return negative;
+        }
+
+        public OffsetCalculator invoke(final int iMaxParsedDigits, final boolean iSigned) {
+            limit = Math.min(iMaxParsedDigits, text.length() - position);
+            while (length < limit && (isADigit(text.charAt(position + length))
+                    || isPrefixedWithPlusOrMinus() && iSigned)) {
+                updateBasedOnSign();
+                length = length + 1;
+            }
+            return this;
+        }
+
+        private void updateBasedOnSign() {
+            if (isPrefixedWithPlusOrMinus()) {
+                negative = text.charAt(position + length) == '-';
+                length = (negative) ? length + 1 : length;
+                position = (negative) ? position : position + 1;
+                // Expand the limit to disregard the sign character.
+                limit = Math.min(limit + 1, text.length() - position);
+            }
+        }
+
+        private boolean isPrefixedWithPlusOrMinus() {
+            final int index = position + length;
+            final char currentCharacter = text.charAt(index);
+            final boolean isFirstCharacterOperator = length == 0 && (currentCharacter == '-' || currentCharacter == '+');
+            final boolean hasNextDigitCharacter = index < text.length() - 1 && isADigit(text.charAt(index + 1));
+            return isFirstCharacterOperator && isBeforeBoundary() && hasNextDigitCharacter;
+        }
+
+        private boolean isBeforeBoundary() {
+            return length + 1 <= limit;
+        }
+
+        private static boolean isADigit(final char c) {
+            return !isNotADigit(c);
+        }
+
+        private static boolean isNotADigit(final char c) {
+            return c < '0' || c > '9';
+        }
     }
 }
