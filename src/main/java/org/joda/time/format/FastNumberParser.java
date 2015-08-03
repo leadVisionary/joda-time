@@ -22,19 +22,9 @@ final class FastNumberParser {
 
         boolean negative = false;
         int length = 0;
-        while (length < limit) {
-            final int index = position + length;
-            char c = text.charAt(index);
-            final boolean isPlusOrMinus = c == '-' || c == '+';
-            final boolean isFirstCharacterOperator = length == 0 && isPlusOrMinus;
-            final boolean b = !isPastBoundary(limit, length) && !isNotADigit(text.charAt(index + 1));
-            final boolean b1 = isFirstCharacterOperator && iSigned && b;
-            if (!b1 && isNotADigit(c)) {
-                break;
-            }
-            if (b1) {
-                negative = c == '-';
-
+        while (length < limit && (isADigit(text.charAt(position + length)) || prefixedWithPlusOrMinus(text, position, limit, length))) {
+            if (prefixedWithPlusOrMinus(text, position, limit, length)) {
+                negative = text.charAt(position + length) == '-';
                 length = (negative) ? length + 1 : length;
                 position = (negative) ? position : position + 1;
                 // Expand the limit to disregard the sign character.
@@ -76,8 +66,19 @@ final class FastNumberParser {
         return position;
     }
 
+    private boolean prefixedWithPlusOrMinus(final CharSequence text, final int position, final int limit, final int length) {
+        final int index = position + length;
+        final boolean isFirstCharacterOperator = length == 0 && (text.charAt(index) == '-' || text.charAt(index) == '+');
+        final boolean isNextCharacterADigit = index < text.length() - 1 && isADigit(text.charAt(index + 1));
+        return isFirstCharacterOperator && iSigned && !isPastBoundary(limit, length) && isNextCharacterADigit;
+    }
+
     private static boolean isPastBoundary(final int limit, final int length) {
         return length + 1 >= limit;
+    }
+
+    private static boolean isADigit(final char c) {
+        return !isNotADigit(c);
     }
 
     private static boolean isNotADigit(final char c) {
