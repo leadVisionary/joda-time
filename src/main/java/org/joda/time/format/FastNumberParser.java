@@ -27,12 +27,7 @@ final class FastNumberParser {
             final boolean isFirstCharacterOperator = length == 0 && (c == '-' || c == '+');
             final boolean b = isPastBoundary(limit, length) || isNotADigit(text.charAt(position + length + 1));
             final boolean b1 = isFirstCharacterOperator && iSigned && !b;
-            if (!b1) {
-                if (isNotADigit(c)) {
-                    break;
-                }
-                length++;
-            } else {
+            if (b1) {
                 negative = c == '-';
 
                 if (negative) {
@@ -43,6 +38,11 @@ final class FastNumberParser {
                 }
                 // Expand the limit to disregard the sign character.
                 limit = Math.min(limit + 1, text.length() - position);
+            } else {
+                if (isNotADigit(c)) {
+                    break;
+                }
+                length++;
             }
         }
 
