@@ -94,14 +94,12 @@ final class FastNumberParser {
             return this;
         }
 
-        private void updateBasedOnSign() {
-            if (isPrefixedWithPlusOrMinus()) {
-                negative = text.charAt(position + length) == '-';
-                length = (negative) ? length + 1 : length;
-                position = (negative) ? position : position + 1;
-                // Expand the limit to disregard the sign character.
-                limit = Math.min(limit + 1, text.length() - position);
-            }
+        private static boolean isADigit(final char c) {
+            return !isNotADigit(c);
+        }
+
+        private static boolean isNotADigit(final char c) {
+            return c < '0' || c > '9';
         }
 
         private boolean isPrefixedWithPlusOrMinus() {
@@ -116,12 +114,14 @@ final class FastNumberParser {
             return length + 1 <= limit;
         }
 
-        private static boolean isADigit(final char c) {
-            return !isNotADigit(c);
-        }
-
-        private static boolean isNotADigit(final char c) {
-            return c < '0' || c > '9';
+        private void updateBasedOnSign() {
+            if (isPrefixedWithPlusOrMinus()) {
+                negative = text.charAt(position + length) == '-';
+                length = (negative) ? length + 1 : length;
+                position = (negative) ? position : position + 1;
+                // Expand the limit to disregard the sign character.
+                limit = Math.min(limit + 1, text.length() - position);
+            }
         }
     }
 }
