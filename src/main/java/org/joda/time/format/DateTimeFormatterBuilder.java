@@ -1287,7 +1287,6 @@ public class DateTimeFormatterBuilder {
         protected final DateTimeFieldType iFieldType;
         protected final int iMaxParsedDigits;
         protected final boolean iSigned;
-        private FastNumberParser parser;
 
         NumberFormatter(DateTimeFieldType fieldType,
                 int maxParsedDigits, boolean signed) {
@@ -1295,7 +1294,6 @@ public class DateTimeFormatterBuilder {
             iFieldType = fieldType;
             iMaxParsedDigits = maxParsedDigits;
             iSigned = signed;
-            parser = new FastNumberParser(iMaxParsedDigits, iSigned, iFieldType);
         }
 
         public int estimateParsedLength() {
@@ -1303,7 +1301,13 @@ public class DateTimeFormatterBuilder {
         }
 
         public int parseInto(DateTimeParserBucket bucket, CharSequence text, int position) {
-            return parser.parse(bucket, text, position);
+            final OffsetCalculator calculator = new OffsetCalculator(text, position);
+            calculator.invoke(iMaxParsedDigits, iSigned);
+            final int updatedPosition = calculator.getPosition();
+
+
+            bucket.saveField(iFieldType, calculator.getValue());
+            return updatedPosition;
         }
 
     }
