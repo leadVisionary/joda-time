@@ -31,43 +31,26 @@ final class OffsetCalculator {
     }
 
     void calculate() {
-        limit = Math.min(maxParsedDigits, text.length() - position);
-        while (length < limit && (isADigit(text.charAt(position + length))
-                || isPrefixedWithPlusOrMinus() && isSigned)) {
-            updateBasedOnSign();
-            length = length + 1;
-        }
+        calculateLength();
 
         if (length == 0) {
             position = ~position;
-            return;
-        }
-
-        if (length >= 9) {
-            // Since value may exceed integer limits, use stock parser
-            // which checks for this.
-            value = Integer.parseInt(text.subSequence(position, position += length).toString());
         } else {
-            int i = position;
-            if (negative) {
-                i++;
-            }
-
-            final int index = i++;
-            if (index > text.length()) {
-                position = ~position;
-                return;
-            }
-            value = text.charAt(index) - '0';
-            position += length;
-            while (i < position) {
-                value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
-            }
-            if (negative) {
-                value = -value;
-            }
+            updateValue();
         }
+    }
 
+    private void calculateLength() {
+        limit = Math.min(maxParsedDigits, text.length() - position);
+        while (length < limit && shouldContinue()) {
+            updateBasedOnSign();
+            length = length + 1;
+        }
+    }
+
+    private boolean shouldContinue() {
+        final boolean hasSign = isPrefixedWithPlusOrMinus() && isSigned;
+        return isADigit(text.charAt(position + length)) || hasSign;
     }
 
     private static boolean isADigit(final char c) {
@@ -97,6 +80,37 @@ final class OffsetCalculator {
             position = (negative) ? position : position + 1;
             // Expand the limit to disregard the sign character.
             limit = Math.min(limit + 1, text.length() - position);
+        }
+    }
+
+    private void updateValue() {
+        if (length >= 9) {
+            // Since value may exceed integer limits, use stock parser
+            // which checks for this.
+            value = Integer.parseInt(text.subSequence(position, position += length).toString());
+        } else {
+            calculateValueForLengthBetween1And8();
+        }
+    }
+
+    private void calculateValueForLengthBetween1And8() {
+        int i = position;
+        if (negative) {
+            i++;
+        }
+
+        final int index = i++;
+        if (index > text.length()) {
+            position = ~position;
+            return;
+        }
+        value = text.charAt(index) - '0';
+        position += length;
+        while (i < position) {
+            value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
+        }
+        if (negative) {
+            value = -value;
         }
     }
 }
