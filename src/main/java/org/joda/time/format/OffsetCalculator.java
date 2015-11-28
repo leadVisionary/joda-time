@@ -2,6 +2,8 @@ package org.joda.time.format;
 
 final class OffsetCalculator {
     private final CharSequence text;
+    private final int maxParsedDigits;
+    private final boolean isSigned;
     private int position;
     private int length;
     private boolean negative;
@@ -9,33 +11,29 @@ final class OffsetCalculator {
     private int value;
 
     OffsetCalculator(final CharSequence text,
-                            final int position) {
+                     final int iMaxParsedDigits,
+                     final boolean iSigned,
+                     final int position) {
         this.text = text;
         this.position = position;
         length = 0;
         negative = false;
+        maxParsedDigits = iMaxParsedDigits;
+        isSigned = iSigned;
     }
 
     int getPosition() {
         return position;
     }
 
-    int getLength() {
-        return length;
-    }
-
     int getValue() {
         return value;
     }
 
-    boolean isNegative() {
-        return negative;
-    }
-
-    void invoke(final int iMaxParsedDigits, final boolean iSigned) {
-        limit = Math.min(iMaxParsedDigits, text.length() - position);
+    void calculate() {
+        limit = Math.min(maxParsedDigits, text.length() - position);
         while (length < limit && (isADigit(text.charAt(position + length))
-                || isPrefixedWithPlusOrMinus() && iSigned)) {
+                || isPrefixedWithPlusOrMinus() && isSigned)) {
             updateBasedOnSign();
             length = length + 1;
         }
@@ -51,7 +49,7 @@ final class OffsetCalculator {
             value = Integer.parseInt(text.subSequence(position, position += length).toString());
         } else {
             int i = position;
-            if (isNegative()) {
+            if (negative) {
                 i++;
             }
 
@@ -65,7 +63,7 @@ final class OffsetCalculator {
             while (i < position) {
                 value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
             }
-            if (isNegative()) {
+            if (negative) {
                 value = -value;
             }
         }

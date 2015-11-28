@@ -1301,13 +1301,11 @@ public class DateTimeFormatterBuilder {
         }
 
         public int parseInto(DateTimeParserBucket bucket, CharSequence text, int position) {
-            final OffsetCalculator calculator = new OffsetCalculator(text, position);
-            calculator.invoke(iMaxParsedDigits, iSigned);
-            final int updatedPosition = calculator.getPosition();
-
+            final OffsetCalculator calculator = new OffsetCalculator(text, iMaxParsedDigits, iSigned, position);
+            calculator.calculate();
 
             bucket.saveField(iFieldType, calculator.getValue());
-            return updatedPosition;
+            return calculator.getPosition();
         }
 
     }
