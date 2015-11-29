@@ -49,11 +49,7 @@ final class OffsetCalculator {
     }
 
     private static boolean isADigit(final char c) {
-        return !isNotADigit(c);
-    }
-
-    private static boolean isNotADigit(final char c) {
-        return c < '0' || c > '9';
+        return Character.isDigit(c);
     }
 
     private boolean isPrefixedWithPlusOrMinus() {
