@@ -32,12 +32,7 @@ final class OffsetCalculator {
 
     void calculate() {
         calculateLength();
-
-        if (length == 0) {
-            position = ~position;
-        } else {
-            updateValue();
-        }
+        updatePositionAndValue();
     }
 
     private void calculateLength() {
@@ -83,40 +78,39 @@ final class OffsetCalculator {
         }
     }
 
-    private void updateValue() {
-        if (length >= 9) {
+    private void updatePositionAndValue() {
+        if (length == 0) {
+            position = ~position;
+        } else if (length >= 9) {
             // Since value may exceed integer limits, use stock parser
             // which checks for this.
-            value = Integer.parseInt(text.subSequence(position, position += length).toString());
-        } else {
-            calculateValueForLengthBetween1And8();
-        }
-    }
-
-    private void calculateValueForLengthBetween1And8() {
-        int i = position;
-        if (negative) {
-            i++;
-        }
-
-        final int index = i++;
-        if (index < text.length()) {
+            final String toParse = text.subSequence(position, position + length).toString();
+            value = Integer.parseInt(toParse);
             position += length;
-            value = processRemainingCharacters(i, index);
         } else {
-            position = ~position;
+            int i = (negative) ? position + 1 : position;
+
+            final int index = i++;
+            if (index < text.length()) {
+                position += length;
+                value = (negative) ? -calculateValue(i, index) : calculateValue(i, index);
+            } else {
+                position = ~position;
+            }
         }
     }
 
-    private int processRemainingCharacters(int startingIndex, final int currentIndex) {
-        int calculated = text.charAt(currentIndex) - '0';
+    private int calculateValue(final int i, final int index) {
+        int startingIndex = i;
+        int calculated = getAsciiCharacterFor(index);
 
         while (startingIndex < position) {
-            calculated = ((calculated << 3) + (calculated << 1)) + text.charAt(startingIndex++) - '0';
-        }
-        if (negative) {
-            calculated = -calculated;
+            calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(startingIndex++);
         }
         return calculated;
+    }
+
+    private int getAsciiCharacterFor(final int index) {
+        return text.charAt(index) - '0';
     }
 }
