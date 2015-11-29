@@ -35,10 +35,9 @@ final class OffsetCalculator {
 
         if (length == 0) {
             position = ~position;
-            return;
+        } else {
+            updateValue();
         }
-
-        updateValue();
     }
 
     private void calculateLength() {
