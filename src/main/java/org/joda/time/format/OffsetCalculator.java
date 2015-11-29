@@ -100,14 +100,18 @@ final class OffsetCalculator {
         }
 
         final int index = i++;
-        if (index > text.length()) {
+        if (index < text.length()) {
+            processRemainingCharacters(i, index);
+        } else {
             position = ~position;
-            return;
         }
-        value = text.charAt(index) - '0';
+    }
+
+    private void processRemainingCharacters(int startingIndex, final int currentIndex) {
+        value = text.charAt(currentIndex) - '0';
         position += length;
-        while (i < position) {
-            value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
+        while (startingIndex < position) {
+            value = ((value << 3) + (value << 1)) + text.charAt(startingIndex++) - '0';
         }
         if (negative) {
             value = -value;
