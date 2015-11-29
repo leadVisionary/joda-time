@@ -43,11 +43,15 @@ final class OffsetCalculator {
 
     private void calculateLength() {
         limit = Math.min(maxParsedDigits, text.length() - position);
-        while (length < limit && (isADigit(text.charAt(position + length))
-                || isPrefixedWithPlusOrMinus() && isSigned)) {
+        while (length < limit && shouldContinue()) {
             updateBasedOnSign();
             length = length + 1;
         }
+    }
+
+    private boolean shouldContinue() {
+        final boolean hasSign = isPrefixedWithPlusOrMinus() && isSigned;
+        return isADigit(text.charAt(position + length)) || hasSign;
     }
 
     private static boolean isADigit(final char c) {
