@@ -32,12 +32,7 @@ final class OffsetCalculator {
 
     void calculate() {
         calculateLength();
-
-        if (length == 0) {
-            position = ~position;
-        } else {
-            updateValue();
-        }
+        updatePositionAndValue();
     }
 
     private void calculateLength() {
@@ -50,23 +45,19 @@ final class OffsetCalculator {
 
     private boolean shouldContinue() {
         final boolean hasSign = isPrefixedWithPlusOrMinus() && isSigned;
-        return isADigit(text.charAt(position + length)) || hasSign;
-    }
-
-    private static boolean isADigit(final char c) {
-        return !isNotADigit(c);
-    }
-
-    private static boolean isNotADigit(final char c) {
-        return c < '0' || c > '9';
+        return Character.isDigit(text.charAt(position + length)) || hasSign;
     }
 
     private boolean isPrefixedWithPlusOrMinus() {
         final int index = position + length;
         final char currentCharacter = text.charAt(index);
-        final boolean isFirstCharacterOperator = length == 0 && (currentCharacter == '-' || currentCharacter == '+');
-        final boolean hasNextDigitCharacter = index < text.length() - 1 && isADigit(text.charAt(index + 1));
+        final boolean isFirstCharacterOperator = length == 0 && isCharacterOperator(currentCharacter);
+        final boolean hasNextDigitCharacter = index < text.length() - 1 && Character.isDigit(text.charAt(index + 1));
         return isFirstCharacterOperator && isBeforeBoundary() && hasNextDigitCharacter;
+    }
+
+    private static boolean isCharacterOperator(final char currentCharacter) {
+        return currentCharacter == '-' || currentCharacter == '+';
     }
 
     private boolean isBeforeBoundary() {
@@ -76,47 +67,54 @@ final class OffsetCalculator {
     private void updateBasedOnSign() {
         if (isPrefixedWithPlusOrMinus()) {
             negative = text.charAt(position + length) == '-';
-            length = (negative) ? length + 1 : length;
-            position = (negative) ? position : position + 1;
+            length = negative ? length + 1 : length;
+            position = negative ? position : position + 1;
             // Expand the limit to disregard the sign character.
             limit = Math.min(limit + 1, text.length() - position);
         }
     }
 
-    private void updateValue() {
-        if (length >= 9) {
-            // Since value may exceed integer limits, use stock parser
-            // which checks for this.
-            value = Integer.parseInt(text.subSequence(position, position += length).toString());
+    private void updatePositionAndValue() {
+        if (length == 0) {
+            position = ~position;
+        } else if (length >= 9) {
+            useDefaultParser();
         } else {
-            calculateValueForLengthBetween1And8();
+            useFastParser();
         }
     }
 
-    private void calculateValueForLengthBetween1And8() {
-        int i = position;
-        if (negative) {
-            i++;
-        }
+    private void useDefaultParser() {
+        // Since value may exceed integer limits, use stock parser
+        // which checks for this.
+        final String toParse = text.subSequence(position, position + length).toString();
+        value = Integer.parseInt(toParse);
+        position += length;
+    }
+
+    private void useFastParser() {
+        int i = negative ? position + 1 : position;
 
         final int index = i++;
         if (index < text.length()) {
             position += length;
-            value = processRemainingCharacters(i, index);
+            value = negative ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
             position = ~position;
         }
     }
 
-    private int processRemainingCharacters(int startingIndex, final int currentIndex) {
-        int calculated = text.charAt(currentIndex) - '0';
+    private int calculateValue(final int i, final int index) {
+        int startingIndex = i;
+        int calculated = getAsciiCharacterFor(index);
 
         while (startingIndex < position) {
-            calculated = ((calculated << 3) + (calculated << 1)) + text.charAt(startingIndex++) - '0';
-        }
-        if (negative) {
-            calculated = -calculated;
+            calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(startingIndex++);
         }
         return calculated;
+    }
+
+    private int getAsciiCharacterFor(final int index) {
+        return text.charAt(index) - '0';
     }
 }
