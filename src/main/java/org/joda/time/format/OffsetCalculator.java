@@ -45,18 +45,14 @@ final class OffsetCalculator {
 
     private boolean shouldContinue() {
         final boolean hasSign = isPrefixedWithPlusOrMinus() && isSigned;
-        return isADigit(text.charAt(position + length)) || hasSign;
-    }
-
-    private static boolean isADigit(final char c) {
-        return Character.isDigit(c);
+        return Character.isDigit(text.charAt(position + length)) || hasSign;
     }
 
     private boolean isPrefixedWithPlusOrMinus() {
         final int index = position + length;
         final char currentCharacter = text.charAt(index);
         final boolean isFirstCharacterOperator = length == 0 && (currentCharacter == '-' || currentCharacter == '+');
-        final boolean hasNextDigitCharacter = index < text.length() - 1 && isADigit(text.charAt(index + 1));
+        final boolean hasNextDigitCharacter = index < text.length() - 1 && Character.isDigit(text.charAt(index + 1));
         return isFirstCharacterOperator && isBeforeBoundary() && hasNextDigitCharacter;
     }
 
@@ -78,21 +74,29 @@ final class OffsetCalculator {
         if (length == 0) {
             position = ~position;
         } else if (length >= 9) {
-            // Since value may exceed integer limits, use stock parser
-            // which checks for this.
-            final String toParse = text.subSequence(position, position + length).toString();
-            value = Integer.parseInt(toParse);
-            position += length;
+            useDefaultParser();
         } else {
-            int i = (negative) ? position + 1 : position;
+            useFastParser();
+        }
+    }
 
-            final int index = i++;
-            if (index < text.length()) {
-                position += length;
-                value = (negative) ? -calculateValue(i, index) : calculateValue(i, index);
-            } else {
-                position = ~position;
-            }
+    private void useDefaultParser() {
+        // Since value may exceed integer limits, use stock parser
+        // which checks for this.
+        final String toParse = text.subSequence(position, position + length).toString();
+        value = Integer.parseInt(toParse);
+        position += length;
+    }
+
+    private void useFastParser() {
+        int i = (negative) ? position + 1 : position;
+
+        final int index = i++;
+        if (index < text.length()) {
+            position += length;
+            value = (negative) ? -calculateValue(i, index) : calculateValue(i, index);
+        } else {
+            position = ~position;
         }
     }
 
