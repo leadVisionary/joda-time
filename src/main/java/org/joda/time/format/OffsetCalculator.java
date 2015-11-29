@@ -100,17 +100,23 @@ final class OffsetCalculator {
         }
 
         final int index = i++;
-        if (index > text.length()) {
+        if (index < text.length()) {
+            position += length;
+            value = processRemainingCharacters(i, index);
+        } else {
             position = ~position;
-            return;
         }
-        value = text.charAt(index) - '0';
-        position += length;
-        while (i < position) {
-            value = ((value << 3) + (value << 1)) + text.charAt(i++) - '0';
+    }
+
+    private int processRemainingCharacters(int startingIndex, final int currentIndex) {
+        int calculated = text.charAt(currentIndex) - '0';
+
+        while (startingIndex < position) {
+            calculated = ((calculated << 3) + (calculated << 1)) + text.charAt(startingIndex++) - '0';
         }
         if (negative) {
-            value = -value;
+            calculated = -calculated;
         }
+        return calculated;
     }
 }
