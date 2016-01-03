@@ -51,9 +51,13 @@ final class OffsetCalculator {
     private boolean isPrefixedWithPlusOrMinus() {
         final int index = position + length;
         final char currentCharacter = text.charAt(index);
-        final boolean isFirstCharacterOperator = length == 0 && (currentCharacter == '-' || currentCharacter == '+');
+        final boolean isFirstCharacterOperator = length == 0 && isCharacterOperator(currentCharacter);
         final boolean hasNextDigitCharacter = index < text.length() - 1 && Character.isDigit(text.charAt(index + 1));
         return isFirstCharacterOperator && isBeforeBoundary() && hasNextDigitCharacter;
+    }
+
+    private boolean isCharacterOperator(final char currentCharacter) {
+        return currentCharacter == '-' || currentCharacter == '+';
     }
 
     private boolean isBeforeBoundary() {
