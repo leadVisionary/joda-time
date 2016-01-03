@@ -56,7 +56,7 @@ final class OffsetCalculator {
         return isFirstCharacterOperator && isBeforeBoundary() && hasNextDigitCharacter;
     }
 
-    private boolean isCharacterOperator(final char currentCharacter) {
+    private static boolean isCharacterOperator(final char currentCharacter) {
         return currentCharacter == '-' || currentCharacter == '+';
     }
 
@@ -67,8 +67,8 @@ final class OffsetCalculator {
     private void updateBasedOnSign() {
         if (isPrefixedWithPlusOrMinus()) {
             negative = text.charAt(position + length) == '-';
-            length = (negative) ? length + 1 : length;
-            position = (negative) ? position : position + 1;
+            length = negative ? length + 1 : length;
+            position = negative ? position : position + 1;
             // Expand the limit to disregard the sign character.
             limit = Math.min(limit + 1, text.length() - position);
         }
@@ -93,12 +93,12 @@ final class OffsetCalculator {
     }
 
     private void useFastParser() {
-        int i = (negative) ? position + 1 : position;
+        int i = negative ? position + 1 : position;
 
         final int index = i++;
         if (index < text.length()) {
             position += length;
-            value = (negative) ? -calculateValue(i, index) : calculateValue(i, index);
+            value = negative ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
             position = ~position;
         }
