@@ -843,20 +843,24 @@ public class DateTimeFormatter {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                long millis = bucket.computeMillis(true, text);
-                if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
-                    int parsedOffset = bucket.getOffsetInteger();
-                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-                    chrono = chrono.withZone(parsedZone);
-                } else if (bucket.getZone() != null) {
-                    chrono = chrono.withZone(bucket.getZone());
-                }
-                return new LocalDateTime(millis, chrono);
+                return getLocalDateTime(text, chrono, bucket);
             }
         } else {
             newPos = ~newPos;
         }
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
+    private LocalDateTime getLocalDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
+        long millis = bucket.computeMillis(true, text);
+        if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
+            int parsedOffset = bucket.getOffsetInteger();
+            DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
+            chrono = chrono.withZone(parsedZone);
+        } else if (bucket.getZone() != null) {
+            chrono = chrono.withZone(bucket.getZone());
+        }
+        return new LocalDateTime(millis, chrono);
     }
 
     /**
@@ -884,18 +888,22 @@ public class DateTimeFormatter {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                long millis = bucket.computeMillis(true, text);
-                chrono = getChronology(chrono, bucket);
-                DateTime dt = new DateTime(millis, chrono);
-                if (iZone != null) {
-                    dt = dt.withZone(iZone);
-                }
-                return dt;
+                return getDateTime(text, chrono, bucket);
             }
         } else {
             newPos = ~newPos;
         }
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
+    private DateTime getDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
+        long millis = bucket.computeMillis(true, text);
+        chrono = getChronology(chrono, bucket);
+        DateTime dt = new DateTime(millis, chrono);
+        if (iZone != null) {
+            dt = dt.withZone(iZone);
+        }
+        return dt;
     }
 
     /**
@@ -923,18 +931,22 @@ public class DateTimeFormatter {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                long millis = bucket.computeMillis(true, text);
-                chrono = getChronology(chrono, bucket);
-                MutableDateTime dt = new MutableDateTime(millis, chrono);
-                if (iZone != null) {
-                    dt.setZone(iZone);
-                }
-                return dt;
+                return getMutableDateTime(text, chrono, bucket);
             }
         } else {
             newPos = ~newPos;
         }
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
+    private MutableDateTime getMutableDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
+        long millis = bucket.computeMillis(true, text);
+        chrono = getChronology(chrono, bucket);
+        MutableDateTime dt = new MutableDateTime(millis, chrono);
+        if (iZone != null) {
+            dt.setZone(iZone);
+        }
+        return dt;
     }
 
     /**
