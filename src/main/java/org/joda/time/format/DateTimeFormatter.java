@@ -669,7 +669,7 @@ public class DateTimeFormatter {
 
     private void printTo(Appendable appendable, long instant, Chronology chrono) throws IOException {
         InternalPrinter printer = requirePrinter();
-        chrono = selectChronology(chrono);
+        chrono = ChronologyFactory.selectChronology(iChrono, iZone, chrono);
         // Shift instant into local time (UTC) to avoid excessive offset
         // calculations when printing multiple fields in a composite printer.
         DateTimeZone zone = chrono.getZone();
@@ -741,7 +741,7 @@ public class DateTimeFormatter {
         Chronology chrono = instant.getChronology();
         int defaultYear = DateTimeUtils.getChronology(chrono).year().get(instantMillis);
         long instantLocal = instantMillis + chrono.getZone().getOffset(instantMillis);
-        chrono = selectChronology(chrono);
+        chrono = ChronologyFactory.selectChronology(iChrono, iZone, chrono);
         
         DateTimeParserBucket bucket = new DateTimeParserBucket(
             instantLocal, chrono, iLocale, iPivotYear, defaultYear);
@@ -784,7 +784,7 @@ public class DateTimeFormatter {
 
     private long getMillis(String text) {
         InternalParser parser = requireParser();
-        Chronology chrono = selectChronology(iChrono);
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         return bucket.doParseMillis(parser, text);
     }
@@ -846,7 +846,7 @@ public class DateTimeFormatter {
     private LocalDateTime getLocalDateTime(String text) {
         InternalParser parser = requireParser();
 
-        Chronology chrono = selectChronology(null).withUTC();  // always use UTC, avoiding DST gaps
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null).withUTC();  // always use UTC, avoiding DST gaps
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
@@ -895,7 +895,7 @@ public class DateTimeFormatter {
     private DateTime getDateTime(String text) {
         InternalParser parser = requireParser();
 
-        Chronology chrono = selectChronology(null);
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
@@ -942,7 +942,7 @@ public class DateTimeFormatter {
     private MutableDateTime getMutableDateTime(String text) {
         InternalParser parser = requireParser();
 
-        Chronology chrono = selectChronology(null);
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
@@ -979,21 +979,5 @@ public class DateTimeFormatter {
     }
 
     //-----------------------------------------------------------------------
-    /**
-     * Determines the correct chronology to use.
-     *
-     * @param chrono  the proposed chronology
-     * @return the actual chronology
-     */
-    private Chronology selectChronology(Chronology chrono) {
-        chrono = DateTimeUtils.getChronology(chrono);
-        if (iChrono != null) {
-            chrono = iChrono;
-        }
-        if (iZone != null) {
-            chrono = chrono.withZone(iZone);
-        }
-        return chrono;
-    }
 
 }
