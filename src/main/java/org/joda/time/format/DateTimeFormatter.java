@@ -779,6 +779,10 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(String text) {
+        return getMillis(text);
+    }
+
+    private long getMillis(String text) {
         InternalParser parser = requireParser();
         Chronology chrono = selectChronology(iChrono);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
@@ -836,8 +840,12 @@ public class DateTimeFormatter {
      * @since 2.0
      */
     public LocalDateTime parseLocalDateTime(String text) {
+        return getLocalDateTime(text);
+    }
+
+    private LocalDateTime getLocalDateTime(String text) {
         InternalParser parser = requireParser();
-        
+
         Chronology chrono = selectChronology(null).withUTC();  // always use UTC, avoiding DST gaps
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
@@ -881,8 +889,12 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(String text) {
+        return getDateTime(text);
+    }
+
+    private DateTime getDateTime(String text) {
         InternalParser parser = requireParser();
-        
+
         Chronology chrono = selectChronology(null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
@@ -924,8 +936,12 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(String text) {
+        return getMutableDateTime(text);
+    }
+
+    private MutableDateTime getMutableDateTime(String text) {
         InternalParser parser = requireParser();
-        
+
         Chronology chrono = selectChronology(null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
