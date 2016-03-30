@@ -747,6 +747,15 @@ public class DateTimeFormatter {
             instantLocal, chrono, iLocale, iPivotYear, defaultYear);
         int newPos = parser.parseInto(bucket, text, position);
         instant.setMillis(bucket.computeMillis(false, text));
+        chrono = getChronology(chrono, bucket);
+        instant.setChronology(chrono);
+        if (iZone != null) {
+            instant.setZone(iZone);
+        }
+        return newPos;
+    }
+
+    private Chronology getChronology(Chronology chrono, DateTimeParserBucket bucket) {
         if (iOffsetParsed && bucket.getOffsetInteger() != null) {
             int parsedOffset = bucket.getOffsetInteger();
             DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
@@ -754,11 +763,7 @@ public class DateTimeFormatter {
         } else if (bucket.getZone() != null) {
             chrono = chrono.withZone(bucket.getZone());
         }
-        instant.setChronology(chrono);
-        if (iZone != null) {
-            instant.setZone(iZone);
-        }
-        return newPos;
+        return chrono;
     }
 
     /**
@@ -774,6 +779,10 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(String text) {
+        return getMillis(text);
+    }
+
+    private long getMillis(String text) {
         InternalParser parser = requireParser();
         Chronology chrono = selectChronology(iChrono);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
@@ -831,27 +840,35 @@ public class DateTimeFormatter {
      * @since 2.0
      */
     public LocalDateTime parseLocalDateTime(String text) {
+        return getLocalDateTime(text);
+    }
+
+    private LocalDateTime getLocalDateTime(String text) {
         InternalParser parser = requireParser();
-        
+
         Chronology chrono = selectChronology(null).withUTC();  // always use UTC, avoiding DST gaps
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                long millis = bucket.computeMillis(true, text);
-                if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
-                    int parsedOffset = bucket.getOffsetInteger();
-                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-                    chrono = chrono.withZone(parsedZone);
-                } else if (bucket.getZone() != null) {
-                    chrono = chrono.withZone(bucket.getZone());
-                }
-                return new LocalDateTime(millis, chrono);
+                return getLocalDateTime(text, chrono, bucket);
             }
         } else {
             newPos = ~newPos;
         }
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
+    private LocalDateTime getLocalDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
+        long millis = bucket.computeMillis(true, text);
+        if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
+            int parsedOffset = bucket.getOffsetInteger();
+            DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
+            chrono = chrono.withZone(parsedZone);
+        } else if (bucket.getZone() != null) {
+            chrono = chrono.withZone(bucket.getZone());
+        }
+        return new LocalDateTime(millis, chrono);
     }
 
     /**
@@ -872,31 +889,33 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(String text) {
+        return getDateTime(text);
+    }
+
+    private DateTime getDateTime(String text) {
         InternalParser parser = requireParser();
-        
+
         Chronology chrono = selectChronology(null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                long millis = bucket.computeMillis(true, text);
-                if (iOffsetParsed && bucket.getOffsetInteger() != null) {
-                    int parsedOffset = bucket.getOffsetInteger();
-                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-                    chrono = chrono.withZone(parsedZone);
-                } else if (bucket.getZone() != null) {
-                    chrono = chrono.withZone(bucket.getZone());
-                }
-                DateTime dt = new DateTime(millis, chrono);
-                if (iZone != null) {
-                    dt = dt.withZone(iZone);
-                }
-                return dt;
+                return getDateTime(text, chrono, bucket);
             }
         } else {
             newPos = ~newPos;
         }
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
+    private DateTime getDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
+        long millis = bucket.computeMillis(true, text);
+        chrono = getChronology(chrono, bucket);
+        DateTime dt = new DateTime(millis, chrono);
+        if (iZone != null) {
+            dt = dt.withZone(iZone);
+        }
+        return dt;
     }
 
     /**
@@ -917,31 +936,33 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(String text) {
+        return getMutableDateTime(text);
+    }
+
+    private MutableDateTime getMutableDateTime(String text) {
         InternalParser parser = requireParser();
-        
+
         Chronology chrono = selectChronology(null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                long millis = bucket.computeMillis(true, text);
-                if (iOffsetParsed && bucket.getOffsetInteger() != null) {
-                    int parsedOffset = bucket.getOffsetInteger();
-                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-                    chrono = chrono.withZone(parsedZone);
-                } else if (bucket.getZone() != null) {
-                    chrono = chrono.withZone(bucket.getZone());
-                }
-                MutableDateTime dt = new MutableDateTime(millis, chrono);
-                if (iZone != null) {
-                    dt.setZone(iZone);
-                }
-                return dt;
+                return getMutableDateTime(text, chrono, bucket);
             }
         } else {
             newPos = ~newPos;
         }
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
+    private MutableDateTime getMutableDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
+        long millis = bucket.computeMillis(true, text);
+        chrono = getChronology(chrono, bucket);
+        MutableDateTime dt = new MutableDateTime(millis, chrono);
+        if (iZone != null) {
+            dt.setZone(iZone);
+        }
+        return dt;
     }
 
     /**
