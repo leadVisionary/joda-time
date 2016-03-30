@@ -986,14 +986,23 @@ public class DateTimeFormatter {
      * @return the actual chronology
      */
     private Chronology selectChronology(Chronology chrono) {
+        chrono = getChronologyWithDefaultValue(chrono);
+        chrono = getChronologyWithTimeZone(chrono, iZone);
+        return chrono;
+    }
+
+    private Chronology getChronologyWithDefaultValue(Chronology chrono) {
         chrono = DateTimeUtils.getChronology(chrono);
         if (iChrono != null) {
             chrono = iChrono;
         }
-        if (iZone != null) {
-            chrono = chrono.withZone(iZone);
-        }
         return chrono;
     }
 
+    private Chronology getChronologyWithTimeZone(Chronology chrono, DateTimeZone defaultTimeZone) {
+        if (defaultTimeZone != null) {
+            chrono = chrono.withZone(defaultTimeZone);
+        }
+        return chrono;
+    }
 }
