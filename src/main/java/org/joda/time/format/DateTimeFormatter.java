@@ -747,6 +747,15 @@ public class DateTimeFormatter {
             instantLocal, chrono, iLocale, iPivotYear, defaultYear);
         int newPos = parser.parseInto(bucket, text, position);
         instant.setMillis(bucket.computeMillis(false, text));
+        chrono = getChronology(chrono, bucket);
+        instant.setChronology(chrono);
+        if (iZone != null) {
+            instant.setZone(iZone);
+        }
+        return newPos;
+    }
+
+    private Chronology getChronology(Chronology chrono, DateTimeParserBucket bucket) {
         if (iOffsetParsed && bucket.getOffsetInteger() != null) {
             int parsedOffset = bucket.getOffsetInteger();
             DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
@@ -754,11 +763,7 @@ public class DateTimeFormatter {
         } else if (bucket.getZone() != null) {
             chrono = chrono.withZone(bucket.getZone());
         }
-        instant.setChronology(chrono);
-        if (iZone != null) {
-            instant.setZone(iZone);
-        }
-        return newPos;
+        return chrono;
     }
 
     /**
@@ -880,13 +885,7 @@ public class DateTimeFormatter {
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 long millis = bucket.computeMillis(true, text);
-                if (iOffsetParsed && bucket.getOffsetInteger() != null) {
-                    int parsedOffset = bucket.getOffsetInteger();
-                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-                    chrono = chrono.withZone(parsedZone);
-                } else if (bucket.getZone() != null) {
-                    chrono = chrono.withZone(bucket.getZone());
-                }
+                chrono = getChronology(chrono, bucket);
                 DateTime dt = new DateTime(millis, chrono);
                 if (iZone != null) {
                     dt = dt.withZone(iZone);
@@ -925,13 +924,7 @@ public class DateTimeFormatter {
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 long millis = bucket.computeMillis(true, text);
-                if (iOffsetParsed && bucket.getOffsetInteger() != null) {
-                    int parsedOffset = bucket.getOffsetInteger();
-                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-                    chrono = chrono.withZone(parsedZone);
-                } else if (bucket.getZone() != null) {
-                    chrono = chrono.withZone(bucket.getZone());
-                }
+                chrono = getChronology(chrono, bucket);
                 MutableDateTime dt = new MutableDateTime(millis, chrono);
                 if (iZone != null) {
                     dt.setZone(iZone);
