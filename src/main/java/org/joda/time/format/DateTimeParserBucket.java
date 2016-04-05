@@ -137,6 +137,19 @@ public class DateTimeParserBucket {
         return dt;
     }
 
+    MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, Chronology chrono) {
+
+        int newPos = parser.parseInto(this, text, 0);
+        if (newPos >= 0) {
+            if (newPos >= text.length()) {
+                return getMutableDateTime(iOffsetParsed, iZone, text, chrono);
+            }
+        } else {
+            newPos = ~newPos;
+        }
+        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
     MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, Chronology chrono) {
         return getMutableDateTime(iZone, computeMillis(true, text), getChronology(iOffsetParsed, chrono));
     }

@@ -893,23 +893,8 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(String text) {
-        return getMutableDateTime(text);
-    }
-
-    private MutableDateTime getMutableDateTime(String text) {
-        InternalParser parser = requireParser();
-
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
-        DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
-        int newPos = parser.parseInto(bucket, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
-                return bucket.getMutableDateTime(iOffsetParsed, iZone, text, chrono);
-            }
-        } else {
-            newPos = ~newPos;
-        }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear).getMutableDateTime(iOffsetParsed, iZone, text, requireParser(), chrono);
     }
 
     /**
