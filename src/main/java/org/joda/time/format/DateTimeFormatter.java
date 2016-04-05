@@ -889,15 +889,14 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(String text) {
-        return getDateTime(text, requireParser(), ChronologyFactory.selectChronology(iChrono, iZone, null));
+        return getDateTime(text, requireParser(), ChronologyFactory.selectChronology(iChrono, iZone, null), new DateTimeParserBucket(0, ChronologyFactory.selectChronology(iChrono, iZone, null), iLocale, iPivotYear, iDefaultYear));
     }
 
-    private DateTime getDateTime(String text, final InternalParser parser, Chronology chrono) {
-        DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
+    private DateTime getDateTime(String text, final InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                return getDateTime(text, chrono, bucket);
+                return getDateTime(text, bucket, getChronology(chrono, bucket));
             }
         } else {
             newPos = ~newPos;
@@ -905,10 +904,9 @@ public class DateTimeFormatter {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    private DateTime getDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
+    private DateTime getDateTime(String text, DateTimeParserBucket bucket, Chronology chronology) {
         long millis = bucket.computeMillis(true, text);
-        chrono = getChronology(chrono, bucket);
-        DateTime dt = new DateTime(millis, chrono);
+        DateTime dt = new DateTime(millis, chronology);
         if (iZone != null) {
             dt = dt.withZone(iZone);
         }
