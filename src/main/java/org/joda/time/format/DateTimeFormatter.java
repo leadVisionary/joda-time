@@ -896,7 +896,7 @@ public class DateTimeFormatter {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                return getDateTime(text, bucket, getChronology(chrono, bucket));
+                return getDateTime(getChronology(chrono, bucket), bucket.computeMillis(true, text));
             }
         } else {
             newPos = ~newPos;
@@ -904,8 +904,7 @@ public class DateTimeFormatter {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    private DateTime getDateTime(String text, DateTimeParserBucket bucket, Chronology chronology) {
-        long millis = bucket.computeMillis(true, text);
+    private DateTime getDateTime(Chronology chronology, long millis) {
         DateTime dt = new DateTime(millis, chronology);
         if (iZone != null) {
             dt = dt.withZone(iZone);
