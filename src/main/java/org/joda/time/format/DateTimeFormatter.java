@@ -747,7 +747,7 @@ public class DateTimeFormatter {
             instantLocal, chrono, iLocale, iPivotYear, defaultYear);
         int newPos = parser.parseInto(bucket, text, position);
         instant.setMillis(bucket.computeMillis(false, text));
-        chrono = getChronology(chrono, bucket);
+        chrono = getChronology(iOffsetParsed, chrono, bucket);
         instant.setChronology(chrono);
         if (iZone != null) {
             instant.setZone(iZone);
@@ -755,7 +755,7 @@ public class DateTimeFormatter {
         return newPos;
     }
 
-    private Chronology getChronology(Chronology chrono, DateTimeParserBucket bucket) {
+    private static Chronology getChronology(boolean iOffsetParsed, Chronology chrono, DateTimeParserBucket bucket) {
         if (iOffsetParsed && bucket.getOffsetInteger() != null) {
             int parsedOffset = bucket.getOffsetInteger();
             DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
@@ -890,14 +890,14 @@ public class DateTimeFormatter {
      */
     public DateTime parseDateTime(String text) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
-        return getDateTime(text, requireParser(), chrono, new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear));
+        return getDateTime(iOffsetParsed, iZone, text, requireParser(), chrono, new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear));
     }
 
-    private DateTime getDateTime(String text, final InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
+    private static DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                return getDateTime(iZone, getChronology(chrono, bucket), bucket.computeMillis(true, text));
+                return getDateTime(iZone, getChronology(iOffsetParsed, chrono, bucket), bucket.computeMillis(true, text));
             }
         } else {
             newPos = ~newPos;
@@ -952,7 +952,7 @@ public class DateTimeFormatter {
 
     private MutableDateTime getMutableDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
         long millis = bucket.computeMillis(true, text);
-        chrono = getChronology(chrono, bucket);
+        chrono = getChronology(iOffsetParsed, chrono, bucket);
         MutableDateTime dt = new MutableDateTime(millis, chrono);
         if (iZone != null) {
             dt.setZone(iZone);
