@@ -743,13 +743,7 @@ public class DateTimeFormatter {
 
         DateTimeParserBucket bucket = new DateTimeParserBucket(
                 instantLocal, chrono, iLocale, iPivotYear, defaultYear);
-        return parseIntoInstant(instant, text, position, requireParser(), chrono,  bucket);
-    }
-
-    private int parseIntoInstant(ReadWritableInstant instant, String text, int position, InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
-        int newPos = parser.parseInto(bucket, text, position);
-        instant.update(iZone, bucket.computeMillis(false, text), bucket.getChronology(iOffsetParsed, chrono));
-        return newPos;
+        return bucket.parseIntoInstant(iOffsetParsed, iZone, instant, text, position, requireParser(), chrono);
     }
 
     /**
