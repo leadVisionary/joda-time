@@ -129,6 +129,18 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
+    static MutableDateTime getMutableDateTime(DateTimeZone iZone, long l, Chronology chronology) {
+        MutableDateTime dt = new MutableDateTime(l, chronology);
+        if (iZone != null) {
+            dt.setZone(iZone);
+        }
+        return dt;
+    }
+
+    MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, Chronology chrono) {
+        return getMutableDateTime(iZone, computeMillis(true, text), getChronology(iOffsetParsed, chrono));
+    }
+
 
     DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono) {
         int newPos = parser.parseInto(this, text, 0);
