@@ -27,6 +27,8 @@ package org.joda.time;
  */
 public interface ReadWritableInstant extends ReadableInstant {
 
+    void update(DateTimeZone iZone, long millis, Chronology chronology);
+
     /**
      * Sets the value as the number of milliseconds since
      * the epoch, 1970-01-01T00:00:00Z.

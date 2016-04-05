@@ -748,16 +748,8 @@ public class DateTimeFormatter {
 
     private int parseIntoInstant(ReadWritableInstant instant, String text, int position, InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
         int newPos = parser.parseInto(bucket, text, position);
-        updateInstant(iZone, instant, bucket.computeMillis(false, text), bucket.getChronology(iOffsetParsed, chrono));
+        instant.update(iZone, bucket.computeMillis(false, text), bucket.getChronology(iOffsetParsed, chrono));
         return newPos;
-    }
-
-    private static void updateInstant(DateTimeZone iZone, ReadWritableInstant instant, long millis, Chronology chronology) {
-        instant.setMillis(millis);
-        instant.setChronology(chronology);
-        if (iZone != null) {
-            instant.setZone(iZone);
-        }
     }
 
     /**

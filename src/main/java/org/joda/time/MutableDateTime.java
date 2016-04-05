@@ -380,6 +380,14 @@ public class MutableDateTime
               hourOfDay, minuteOfHour, secondOfMinute, millisOfSecond, chronology);
     }
 
+    public void update(DateTimeZone iZone, long millis, Chronology chronology) {
+        setMillis(millis);
+        setChronology(chronology);
+        if (iZone != null) {
+            setZone(iZone);
+        }
+    }
+
     //-----------------------------------------------------------------------
     /**
      * Gets the field used for rounding this instant, returning null if rounding
