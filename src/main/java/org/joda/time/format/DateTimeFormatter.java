@@ -747,23 +747,12 @@ public class DateTimeFormatter {
             instantLocal, chrono, iLocale, iPivotYear, defaultYear);
         int newPos = parser.parseInto(bucket, text, position);
         instant.setMillis(bucket.computeMillis(false, text));
-        chrono = getChronology(iOffsetParsed, chrono, bucket);
+        chrono = bucket.getChronology(iOffsetParsed, chrono);
         instant.setChronology(chrono);
         if (iZone != null) {
             instant.setZone(iZone);
         }
         return newPos;
-    }
-
-    private static Chronology getChronology(boolean iOffsetParsed, Chronology chrono, DateTimeParserBucket bucket) {
-        if (iOffsetParsed && bucket.getOffsetInteger() != null) {
-            int parsedOffset = bucket.getOffsetInteger();
-            DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-            chrono = chrono.withZone(parsedZone);
-        } else if (bucket.getZone() != null) {
-            chrono = chrono.withZone(bucket.getZone());
-        }
-        return chrono;
     }
 
     /**
@@ -890,27 +879,7 @@ public class DateTimeFormatter {
      */
     public DateTime parseDateTime(String text) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
-        return getDateTime(iOffsetParsed, iZone, text, requireParser(), chrono, new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear));
-    }
-
-    private static DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
-        int newPos = parser.parseInto(bucket, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
-                return getDateTime(iZone, getChronology(iOffsetParsed, chrono, bucket), bucket.computeMillis(true, text));
-            }
-        } else {
-            newPos = ~newPos;
-        }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
-    }
-
-    private static DateTime getDateTime(DateTimeZone iZone, Chronology chronology, long millis) {
-        DateTime dt = new DateTime(millis, chronology);
-        if (iZone != null) {
-            dt = dt.withZone(iZone);
-        }
-        return dt;
+        return DateTimeFactory.getDateTime(iOffsetParsed, iZone, text, requireParser(), chrono, new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear));
     }
 
     /**
@@ -952,7 +921,7 @@ public class DateTimeFormatter {
 
     private MutableDateTime getMutableDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
         long millis = bucket.computeMillis(true, text);
-        chrono = getChronology(iOffsetParsed, chrono, bucket);
+        chrono = bucket.getChronology(iOffsetParsed, chrono);
         MutableDateTime dt = new MutableDateTime(millis, chrono);
         if (iZone != null) {
             dt.setZone(iZone);
@@ -971,6 +940,29 @@ public class DateTimeFormatter {
             throw new UnsupportedOperationException("Parsing not supported");
         }
         return parser;
+    }
+
+    public static class DateTimeFactory {
+
+        static DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
+            int newPos = parser.parseInto(bucket, text, 0);
+            if (newPos >= 0) {
+                if (newPos >= text.length()) {
+                    return getDateTime(iZone, bucket.getChronology(iOffsetParsed, chrono), bucket.computeMillis(true, text));
+                }
+            } else {
+                newPos = ~newPos;
+            }
+            throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+        }
+
+        static DateTime getDateTime(DateTimeZone iZone, Chronology chronology, long millis) {
+            DateTime dt = new DateTime(millis, chronology);
+            if (iZone != null) {
+                dt = dt.withZone(iZone);
+            }
+            return dt;
+        }
     }
 
     //-----------------------------------------------------------------------
