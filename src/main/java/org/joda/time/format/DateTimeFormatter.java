@@ -747,17 +747,17 @@ public class DateTimeFormatter {
     }
 
     private int parseIntoInstant(ReadWritableInstant instant, String text, int position, InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
-
-
-
         int newPos = parser.parseInto(bucket, text, position);
-        instant.setMillis(bucket.computeMillis(false, text));
-        Chronology chrono2 = bucket.getChronology(iOffsetParsed, chrono);
-        instant.setChronology(chrono2);
+        updateInstant(iZone, instant, bucket.computeMillis(false, text), bucket.getChronology(iOffsetParsed, chrono));
+        return newPos;
+    }
+
+    private static void updateInstant(DateTimeZone iZone, ReadWritableInstant instant, long millis, Chronology chronology) {
+        instant.setMillis(millis);
+        instant.setChronology(chronology);
         if (iZone != null) {
             instant.setZone(iZone);
         }
-        return newPos;
     }
 
     /**
