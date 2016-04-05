@@ -18,15 +18,7 @@ package org.joda.time.format;
 import java.util.Arrays;
 import java.util.Locale;
 
-import org.joda.time.Chronology;
-import org.joda.time.DateTimeField;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.DateTimeUtils;
-import org.joda.time.DateTimeZone;
-import org.joda.time.DurationField;
-import org.joda.time.DurationFieldType;
-import org.joda.time.IllegalFieldValueException;
-import org.joda.time.IllegalInstantException;
+import org.joda.time.*;
 
 /**
  * DateTimeParserBucket is an advanced class, intended mainly for parser
@@ -137,6 +129,19 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
+
+    DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono) {
+        int newPos = parser.parseInto(this, text, 0);
+        if (newPos >= 0) {
+            if (newPos >= text.length()) {
+                return getDateTime(iZone, getChronology(iOffsetParsed, chrono), computeMillis(true, text));
+            }
+        } else {
+            newPos = ~newPos;
+        }
+        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
     Chronology getChronology(boolean iOffsetParsed, Chronology chrono) {
         if (iOffsetParsed && getOffsetInteger() != null) {
             int parsedOffset = getOffsetInteger();
@@ -146,6 +151,14 @@ public class DateTimeParserBucket {
             chrono = chrono.withZone(getZone());
         }
         return chrono;
+    }
+
+    private static DateTime getDateTime(DateTimeZone iZone, Chronology chronology, long millis) {
+        DateTime dt = new DateTime(millis, chronology);
+        if (iZone != null) {
+            dt = dt.withZone(iZone);
+        }
+        return dt;
     }
 
     //-----------------------------------------------------------------------

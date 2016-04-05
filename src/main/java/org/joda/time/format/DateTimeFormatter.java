@@ -879,7 +879,7 @@ public class DateTimeFormatter {
      */
     public DateTime parseDateTime(String text) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
-        return DateTimeFactory.getDateTime(iOffsetParsed, iZone, text, requireParser(), chrono, new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear));
+        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear).getDateTime(iOffsetParsed, iZone, text, requireParser(), chrono);
     }
 
     /**
@@ -941,30 +941,6 @@ public class DateTimeFormatter {
         }
         return parser;
     }
-
-    public static class DateTimeFactory {
-
-        static DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono, DateTimeParserBucket bucket) {
-            int newPos = parser.parseInto(bucket, text, 0);
-            if (newPos >= 0) {
-                if (newPos >= text.length()) {
-                    return getDateTime(iZone, bucket.getChronology(iOffsetParsed, chrono), bucket.computeMillis(true, text));
-                }
-            } else {
-                newPos = ~newPos;
-            }
-            throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
-        }
-
-        static DateTime getDateTime(DateTimeZone iZone, Chronology chronology, long millis) {
-            DateTime dt = new DateTime(millis, chronology);
-            if (iZone != null) {
-                dt = dt.withZone(iZone);
-            }
-            return dt;
-        }
-    }
-
     //-----------------------------------------------------------------------
 
 }
