@@ -768,14 +768,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(String text) {
-        return getMillis(text);
-    }
-
-    private long getMillis(String text) {
-        InternalParser parser = requireParser();
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
-        DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
-        return bucket.doParseMillis(parser, text);
+        return new DateTimeParserBucket(0, ChronologyFactory.selectChronology(iChrono, iZone, iChrono), iLocale, iPivotYear, iDefaultYear).getMillis(text, requireParser());
     }
 
     /**

@@ -531,6 +531,10 @@ public class DateTimeParserBucket {
         }
     }
 
+    long getMillis(String text, InternalParser parser) {
+        return doParseMillis(parser, text);
+    }
+
     class SavedState {
         final DateTimeZone iZone;
         final Integer iOffset;
