@@ -889,11 +889,10 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(String text) {
-        return getDateTime(text, requireParser());
+        return getDateTime(text, requireParser(), ChronologyFactory.selectChronology(iChrono, iZone, null));
     }
 
-    private DateTime getDateTime(String text, final InternalParser parser) {
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
+    private DateTime getDateTime(String text, final InternalParser parser, Chronology chrono) {
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
