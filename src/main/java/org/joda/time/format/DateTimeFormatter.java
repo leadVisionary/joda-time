@@ -904,7 +904,7 @@ public class DateTimeFormatter {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                return getMutableDateTime(text, chrono, bucket);
+                return getMutableDateTime(bucket.computeMillis(true, text), bucket.getChronology(iOffsetParsed, chrono));
             }
         } else {
             newPos = ~newPos;
@@ -912,10 +912,8 @@ public class DateTimeFormatter {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    private MutableDateTime getMutableDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
-        long millis = bucket.computeMillis(true, text);
-        chrono = bucket.getChronology(iOffsetParsed, chrono);
-        MutableDateTime dt = new MutableDateTime(millis, chrono);
+    private MutableDateTime getMutableDateTime(long l, Chronology chronology) {
+        MutableDateTime dt = new MutableDateTime(l, chronology);
         if (iZone != null) {
             dt.setZone(iZone);
         }
