@@ -732,27 +732,18 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if any field is out of range
      */
     public int parseInto(ReadWritableInstant instant, String text, int position) {
-        InternalParser parser = requireParser();
         if (instant == null) {
             throw new IllegalArgumentException("Instant must not be null");
         }
-        
-        long instantMillis = instant.getMillis();
         Chronology chrono = instant.getChronology();
+        long instantMillis = instant.getMillis();
         int defaultYear = DateTimeUtils.getChronology(chrono).year().get(instantMillis);
         long instantLocal = instantMillis + chrono.getZone().getOffset(instantMillis);
         chrono = ChronologyFactory.selectChronology(iChrono, iZone, chrono);
-        
+
         DateTimeParserBucket bucket = new DateTimeParserBucket(
-            instantLocal, chrono, iLocale, iPivotYear, defaultYear);
-        int newPos = parser.parseInto(bucket, text, position);
-        instant.setMillis(bucket.computeMillis(false, text));
-        chrono = bucket.getChronology(iOffsetParsed, chrono);
-        instant.setChronology(chrono);
-        if (iZone != null) {
-            instant.setZone(iZone);
-        }
-        return newPos;
+                instantLocal, chrono, iLocale, iPivotYear, defaultYear);
+        return bucket.parseIntoInstant(iOffsetParsed, iZone, instant, text, position, requireParser(), chrono);
     }
 
     /**
