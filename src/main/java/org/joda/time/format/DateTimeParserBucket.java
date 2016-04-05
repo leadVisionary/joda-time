@@ -137,6 +137,31 @@ public class DateTimeParserBucket {
         return dt;
     }
 
+    LocalDateTime getLocalDateTime(String text, InternalParser parser, Chronology chrono) {
+
+        int newPos = parser.parseInto(this, text, 0);
+        if (newPos >= 0) {
+            if (newPos >= text.length()) {
+                return getLocalDateTime(text, chrono);
+            }
+        } else {
+            newPos = ~newPos;
+        }
+        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+    }
+
+    LocalDateTime getLocalDateTime(String text, Chronology chrono) {
+        long millis = computeMillis(true, text);
+        if (getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
+            int parsedOffset = getOffsetInteger();
+            DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
+            chrono = chrono.withZone(parsedZone);
+        } else if (getZone() != null) {
+            chrono = chrono.withZone(getZone());
+        }
+        return new LocalDateTime(millis, chrono);
+    }
+
     MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, Chronology chrono) {
 
         int newPos = parser.parseInto(this, text, 0);

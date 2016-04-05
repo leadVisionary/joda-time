@@ -822,35 +822,8 @@ public class DateTimeFormatter {
      * @since 2.0
      */
     public LocalDateTime parseLocalDateTime(String text) {
-        return getLocalDateTime(text);
-    }
-
-    private LocalDateTime getLocalDateTime(String text) {
-        InternalParser parser = requireParser();
-
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null).withUTC();  // always use UTC, avoiding DST gaps
-        DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
-        int newPos = parser.parseInto(bucket, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
-                return getLocalDateTime(text, chrono, bucket);
-            }
-        } else {
-            newPos = ~newPos;
-        }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
-    }
-
-    private LocalDateTime getLocalDateTime(String text, Chronology chrono, DateTimeParserBucket bucket) {
-        long millis = bucket.computeMillis(true, text);
-        if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
-            int parsedOffset = bucket.getOffsetInteger();
-            DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-            chrono = chrono.withZone(parsedZone);
-        } else if (bucket.getZone() != null) {
-            chrono = chrono.withZone(bucket.getZone());
-        }
-        return new LocalDateTime(millis, chrono);
+        Chronology chronology = ChronologyFactory.selectChronology(iChrono, iZone, null);
+        return new DateTimeParserBucket(0, chronology.withUTC(), iLocale, iPivotYear, iDefaultYear).getLocalDateTime(text, requireParser(), chronology.withUTC());
     }
 
     /**
