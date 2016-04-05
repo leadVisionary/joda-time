@@ -892,9 +892,7 @@ public class DateTimeFormatter {
         return getDateTime(text, requireParser());
     }
 
-    private DateTime getDateTime(String text, InternalParser internalParser) {
-        InternalParser parser = internalParser;
-
+    private DateTime getDateTime(String text, final InternalParser parser) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
