@@ -129,6 +129,30 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
+    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone) {
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
+        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
+    }
+
+    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant) {
+        if (instant == null) {
+            throw new IllegalArgumentException("Instant must not be null");
+        }
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology());
+        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
+        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
+        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
+    }
+
+    Chronology getBucketChronology(boolean iOffsetParsed) {
+        Chronology chrono = getChronology();
+        Integer offsetInteger = getOffsetInteger();
+        DateTimeZone zone = getZone();
+        return (iOffsetParsed && offsetInteger != null) ?
+                chrono.withZone(DateTimeZone.forOffsetMillis(offsetInteger)) :
+                (zone != null) ? chrono.withZone(zone) : chrono;
+    }
+
 
     //-----------------------------------------------------------------------
     /**
@@ -165,19 +189,9 @@ public class DateTimeParserBucket {
      */
     public long parseMillis(DateTimeParser parser, CharSequence text) {
         reset();
-        return doParseMillis(DateTimeParserInternalParser.of(parser), text);
-    }
-
-    long doParseMillis(InternalParser parser, CharSequence text) {
-        int newPos = parser.parseInto(this, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
-                return computeMillis(true, text);
-            }
-        } else {
-            newPos = ~newPos;
-        }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
+        return SimpleParser.parseMillis(
+                text,
+                DateTimeParserInternalParser.of(parser), getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
     }
 
     //-----------------------------------------------------------------------
