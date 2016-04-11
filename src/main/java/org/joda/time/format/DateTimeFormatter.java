@@ -736,7 +736,7 @@ public class DateTimeFormatter {
             throw new IllegalArgumentException("Instant must not be null");
         }
         DateTimeParserBucket bucket = new DateTimeParserBucket(instant, iChrono, iZone, iLocale, iPivotYear) ;
-        return bucket.parseIntoInstant(iOffsetParsed, iZone, instant, text, position, requireParser(), ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology()));
+        return bucket.parseIntoInstant(iOffsetParsed, iZone, instant, text, position, requireParser());
     }
 
     /**

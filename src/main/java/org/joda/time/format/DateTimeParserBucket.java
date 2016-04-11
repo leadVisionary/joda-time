@@ -149,9 +149,9 @@ public class DateTimeParserBucket {
         return dt;
     }
 
-    int parseIntoInstant(boolean iOffsetParsed, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser, Chronology chrono) {
+    int parseIntoInstant(boolean iOffsetParsed, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser) {
         int newPos = parser.parseInto(this, text, position);
-        instant.update(iZone, computeMillis(false, text), getChronology(iOffsetParsed, chrono));
+        instant.update(iZone, computeMillis(false, text), getChronology(iOffsetParsed, iChrono));
         return newPos;
     }
 
