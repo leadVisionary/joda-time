@@ -192,7 +192,7 @@ public class DateTimeParserBucket {
         return parser;
     }
 
-    LocalDateTime getLocalDateTime(String text, InternalParser parser, Chronology chrono) {
+    private LocalDateTime getLocalDateTime(String text, InternalParser parser, Chronology chrono) {
 
         int newPos = requireParser(parser).parseInto(this, text, 0);
         if (newPos >= 0) {
@@ -205,7 +205,7 @@ public class DateTimeParserBucket {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    LocalDateTime getLocalDateTime(String text, Chronology chrono) {
+    private LocalDateTime getLocalDateTime(String text, Chronology chrono) {
         long millis = computeMillis(true, text);
         if (getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
             int parsedOffset = getOffsetInteger();
@@ -217,7 +217,7 @@ public class DateTimeParserBucket {
         return new LocalDateTime(millis, chrono);
     }
 
-    MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, Chronology chrono) {
+    private MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, Chronology chrono) {
 
         int newPos = requireParser(parser).parseInto(this, text, 0);
         if (newPos >= 0) {
@@ -230,12 +230,12 @@ public class DateTimeParserBucket {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, Chronology chrono) {
+    private MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, Chronology chrono) {
         return getMutableDateTime(iZone, computeMillis(true, text), getChronology(iOffsetParsed, chrono));
     }
 
 
-    DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono) {
+    private DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono) {
         int newPos = requireParser(parser).parseInto(this, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
@@ -247,7 +247,7 @@ public class DateTimeParserBucket {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    Chronology getChronology(boolean iOffsetParsed, Chronology chrono) {
+    private Chronology getChronology(boolean iOffsetParsed, Chronology chrono) {
         if (iOffsetParsed && getOffsetInteger() != null) {
             int parsedOffset = getOffsetInteger();
             DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
