@@ -22,13 +22,21 @@ final class SimpleParser {
         return newPos;
     }
 
-    static long parseMillis(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, String text, InternalParser parser) {
+    static long parseMillis(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, CharSequence text, InternalParser parser) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
-        return bucket.doParseMillis(parser, text);
+        int newPos = parser.parseInto(bucket, text, 0);
+        if (newPos >= 0) {
+            if (newPos >= text.length()) {
+                return bucket.computeMillis(true, text);
+            }
+        } else {
+            newPos = ~newPos;
+        }
+        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
     }
 
-    static LocalDateTime parseLocalDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, String text, InternalParser parser) {
+    static LocalDateTime parseLocalDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, CharSequence text, InternalParser parser) {
         Chronology chronology = ChronologyFactory.selectChronology(iChrono, iZone, null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chronology.withUTC(), iLocale, iPivotYear, iDefaultYear);
         Chronology chrono = chronology.withUTC();
@@ -52,7 +60,7 @@ final class SimpleParser {
         } else {
             newPos = ~newPos;
         }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
     }
 
     static DateTime parseDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, boolean iOffsetParsed, Integer iPivotYear, DateTimeZone iZone, String text, InternalParser parser) {
