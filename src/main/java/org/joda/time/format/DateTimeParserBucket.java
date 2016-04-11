@@ -102,6 +102,17 @@ public class DateTimeParserBucket {
         this(instantLocal, chrono, locale, pivotYear, 2000);
     }
 
+    public DateTimeParserBucket(ReadWritableInstant instant,
+                                Chronology iChrono,
+                                Locale iLocale,
+                                Integer iPivotYear) {
+        this(instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis()),
+             iChrono,
+             iLocale,
+             iPivotYear,
+             DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis())
+        );
+    }
     /**
      * Constructs a bucket, with the option of specifying the pivot year for
      * two-digit year parsing.
@@ -137,9 +148,9 @@ public class DateTimeParserBucket {
         return dt;
     }
 
-    int parseIntoInstant(boolean iOffsetParsed, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser, Chronology chrono) {
+    int parseIntoInstant(boolean iOffsetParsed, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser) {
         int newPos = parser.parseInto(this, text, position);
-        instant.update(iZone, computeMillis(false, text), getChronology(iOffsetParsed, chrono));
+        instant.update(iZone, computeMillis(false, text), getChronology(iOffsetParsed, iChrono));
         return newPos;
     }
 
