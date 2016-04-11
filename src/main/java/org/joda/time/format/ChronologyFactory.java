@@ -18,11 +18,7 @@ final class ChronologyFactory {
     }
 
     static Chronology getChronologyWithDefaultValue(Chronology defaultChronology, Chronology chrono) {
-        chrono = DateTimeUtils.getChronology(chrono);
-        if (defaultChronology != null) {
-            chrono = defaultChronology;
-        }
-        return chrono;
+        return (defaultChronology != null) ? defaultChronology : DateTimeUtils.getChronology(chrono);
     }
 
     static Chronology getChronologyWithTimeZone(Chronology chrono, DateTimeZone defaultTimeZone) {
