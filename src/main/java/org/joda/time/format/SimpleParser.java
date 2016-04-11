@@ -2,12 +2,9 @@ package org.joda.time.format;
 
 import org.joda.time.*;
 
-import java.util.Locale;
-
 final class SimpleParser {
 
-    static int parseIntoReadWriteableInstant(Chronology iChrono, Locale iLocale, boolean iOffsetParsed, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser) {
-        DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iLocale, iPivotYear, iZone, instant);
+    static int parseIntoReadWriteableInstant(boolean iOffsetParsed, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser, DateTimeParserBucket bucket) {
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
         }
@@ -16,18 +13,7 @@ final class SimpleParser {
         return newPos;
     }
 
-    private static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant) {
-        if (instant == null) {
-            throw new IllegalArgumentException("Instant must not be null");
-        }
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology());
-        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
-        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
-        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
-    }
-
-    static long parseMillis(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, CharSequence text, InternalParser parser) {
-        DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+    static long parseMillis(CharSequence text, InternalParser parser, DateTimeParserBucket bucket) {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
@@ -39,13 +25,7 @@ final class SimpleParser {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
     }
 
-    private static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone) {
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
-        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
-    }
-
-    static LocalDateTime parseLocalDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, CharSequence text, InternalParser parser) {
-        DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+    static LocalDateTime parseLocalDateTime(CharSequence text, InternalParser parser, DateTimeParserBucket bucket) {
         Chronology chrono = bucket.getChronology();
 
         if (parser == null) {
@@ -70,8 +50,7 @@ final class SimpleParser {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
     }
 
-    static DateTime parseDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, boolean iOffsetParsed, Integer iPivotYear, DateTimeZone iZone, String text, InternalParser parser) {
-        DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+    static DateTime parseDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, DateTimeParserBucket bucket) {
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
         }
@@ -90,8 +69,7 @@ final class SimpleParser {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    static MutableDateTime parseMutableDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, boolean iOffsetParsed, Integer iPivotYear, DateTimeZone iZone, String text, InternalParser parser) {
-        DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+    static MutableDateTime parseMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, DateTimeParserBucket bucket) {
 
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");

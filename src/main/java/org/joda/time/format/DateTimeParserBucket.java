@@ -129,6 +129,21 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
+    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone) {
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
+        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
+    }
+
+    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant) {
+        if (instant == null) {
+            throw new IllegalArgumentException("Instant must not be null");
+        }
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology());
+        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
+        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
+        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
+    }
+
 
     //-----------------------------------------------------------------------
     /**
@@ -166,13 +181,8 @@ public class DateTimeParserBucket {
     public long parseMillis(DateTimeParser parser, CharSequence text) {
         reset();
         return SimpleParser.parseMillis(
-                iChrono,
-                iDefaultYear,
-                iLocale,
-                iPivotYear,
-                iZone,
                 text,
-                DateTimeParserInternalParser.of(parser));
+                DateTimeParserInternalParser.of(parser), getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
     }
 
     //-----------------------------------------------------------------------
