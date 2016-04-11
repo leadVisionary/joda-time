@@ -14,23 +14,14 @@ final class ChronologyFactory {
      * @return the actual chronology
      */
     static Chronology selectChronology(Chronology defaultChronology, DateTimeZone defaultTZ, Chronology chrono) {
-        chrono = getChronologyWithDefaultValue(defaultChronology, chrono);
-        chrono = getChronologyWithTimeZone(chrono, defaultTZ);
-        return chrono;
+        return getChronologyWithTimeZone(getChronologyWithDefaultValue(defaultChronology, chrono), defaultTZ);
     }
 
     static Chronology getChronologyWithDefaultValue(Chronology defaultChronology, Chronology chrono) {
-        chrono = DateTimeUtils.getChronology(chrono);
-        if (defaultChronology != null) {
-            chrono = defaultChronology;
-        }
-        return chrono;
+        return (defaultChronology != null) ? defaultChronology : DateTimeUtils.getChronology(chrono);
     }
 
     static Chronology getChronologyWithTimeZone(Chronology chrono, DateTimeZone defaultTimeZone) {
-        if (defaultTimeZone != null) {
-            chrono = chrono.withZone(defaultTimeZone);
-        }
-        return chrono;
+        return (defaultTimeZone != null) ? chrono.withZone(defaultTimeZone) : chrono;
     }
 }
