@@ -14,7 +14,10 @@ final class SimpleParser {
         long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
         int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
         DateTimeParserBucket bucket = new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
-        int newPos = requireParser(parser).parseInto(bucket, text, position);
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = parser.parseInto(bucket, text, position);
         instant.update(iZone, bucket.computeMillis(false, text), ChronologyFactory.getChronology(iOffsetParsed, bucket.getChronology(), bucket.getOffsetInteger(), bucket.getZone()));
         return newPos;
     }
@@ -30,7 +33,10 @@ final class SimpleParser {
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chronology.withUTC(), iLocale, iPivotYear, iDefaultYear);
         Chronology chrono = chronology.withUTC();
 
-        int newPos = requireParser(parser).parseInto(bucket, text, 0);
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 long millis = bucket.computeMillis(true, text);
@@ -52,7 +58,10 @@ final class SimpleParser {
     static DateTime parseDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, boolean iOffsetParsed, Integer iPivotYear, DateTimeZone iZone, String text, InternalParser parser) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
-        int newPos = requireParser(parser).parseInto(bucket, text, 0);
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 DateTime dt = new DateTime(bucket.computeMillis(true, text), ChronologyFactory.getChronology(iOffsetParsed, chrono, bucket.getOffsetInteger(), bucket.getZone()));
@@ -71,7 +80,10 @@ final class SimpleParser {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
 
-        int newPos = requireParser(parser).parseInto(bucket, text, 0);
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), ChronologyFactory.getChronology(iOffsetParsed, chrono, bucket.getOffsetInteger(), bucket.getZone()));
@@ -84,19 +96,5 @@ final class SimpleParser {
             newPos = ~newPos;
         }
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
-    }
-
-    /**
-     * Checks whether parsing is supported.
-     *
-     * @param iParser
-     * @throws UnsupportedOperationException if parsing is not supported
-     */
-    static InternalParser requireParser(InternalParser iParser) {
-        InternalParser parser = iParser;
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        return parser;
     }
 }
