@@ -7,13 +7,7 @@ import java.util.Locale;
 final class SimpleParser {
 
     static int parseIntoReadWriteableInstant(Chronology iChrono, Locale iLocale, boolean iOffsetParsed, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser) {
-        if (instant == null) {
-            throw new IllegalArgumentException("Instant must not be null");
-        }
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology());
-        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
-        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
-        DateTimeParserBucket bucket = new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
+        DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iLocale, iPivotYear, iZone, instant);
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
         }
@@ -22,9 +16,18 @@ final class SimpleParser {
         return newPos;
     }
 
+    private static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant) {
+        if (instant == null) {
+            throw new IllegalArgumentException("Instant must not be null");
+        }
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology());
+        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
+        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
+        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
+    }
+
     static long parseMillis(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, CharSequence text, InternalParser parser) {
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
-        DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
+        DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
@@ -36,10 +39,15 @@ final class SimpleParser {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
     }
 
+    private static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone) {
+        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
+        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
+    }
+
     static LocalDateTime parseLocalDateTime(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, CharSequence text, InternalParser parser) {
         Chronology chronology = ChronologyFactory.selectChronology(iChrono, iZone, null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chronology.withUTC(), iLocale, iPivotYear, iDefaultYear);
-        Chronology chrono = chronology.withUTC();
+        Chronology chrono = bucket.getChronology();
 
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
@@ -94,7 +102,7 @@ final class SimpleParser {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), ChronologyFactory.getChronology(iOffsetParsed, chrono, bucket.getOffsetInteger(), bucket.getZone()));
+                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), ChronologyFactory.getChronology(iOffsetParsed, bucket.getChronology(), bucket.getOffsetInteger(), bucket.getZone()));
                 if (iZone != null) {
                     dt.setZone(iZone);
                 }
