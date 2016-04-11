@@ -155,7 +155,7 @@ public class DateTimeParserBucket {
         DateTimeParserBucket bucket = new DateTimeParserBucket(instant,
                 ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology()),
                 iLocale, iPivotYear) ;
-        int newPos = parser.parseInto(bucket, text, position);
+        int newPos = requireParser(parser).parseInto(bucket, text, position);
         instant.update(iZone, bucket.computeMillis(false, text), bucket.getChronology(iOffsetParsed, bucket.iChrono));
         return newPos;
     }
@@ -180,9 +180,23 @@ public class DateTimeParserBucket {
         return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear).getMutableDateTime(iOffsetParsed, iZone, text, parser, chrono);
     }
 
+    /**
+     * Checks whether parsing is supported.
+     *
+     * @throws UnsupportedOperationException if parsing is not supported
+     * @param iParser
+     */
+    private static InternalParser requireParser(InternalParser iParser) {
+        InternalParser parser = iParser;
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        return parser;
+    }
+
     LocalDateTime getLocalDateTime(String text, InternalParser parser, Chronology chrono) {
 
-        int newPos = parser.parseInto(this, text, 0);
+        int newPos = requireParser(parser).parseInto(this, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 return getLocalDateTime(text, chrono);
@@ -207,7 +221,7 @@ public class DateTimeParserBucket {
 
     MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, Chronology chrono) {
 
-        int newPos = parser.parseInto(this, text, 0);
+        int newPos = requireParser(parser).parseInto(this, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 return getMutableDateTime(iOffsetParsed, iZone, text, chrono);
@@ -224,7 +238,7 @@ public class DateTimeParserBucket {
 
 
     DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, final InternalParser parser, Chronology chrono) {
-        int newPos = parser.parseInto(this, text, 0);
+        int newPos = requireParser(parser).parseInto(this, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 return getDateTime(iZone, getChronology(iOffsetParsed, chrono), computeMillis(true, text));

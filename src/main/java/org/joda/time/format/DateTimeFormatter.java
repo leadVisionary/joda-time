@@ -732,7 +732,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if any field is out of range
      */
     public int parseInto(ReadWritableInstant instant, String text, int position) {
-        return DateTimeParserBucket.parseIntoReadWriteableInstant(iChrono, iLocale, iOffsetParsed, iPivotYear, iZone, instant, text, position, requireParser());
+        return DateTimeParserBucket.parseIntoReadWriteableInstant(iChrono, iLocale, iOffsetParsed, iPivotYear, iZone, instant, text, position, iParser);
     }
 
     /**
@@ -748,7 +748,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(String text) {
-        return DateTimeParserBucket.parseMillis(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, text, this.requireParser());
+        return DateTimeParserBucket.parseMillis(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, text, this.iParser);
     }
 
     /**
@@ -802,7 +802,7 @@ public class DateTimeFormatter {
      * @since 2.0
      */
     public LocalDateTime parseLocalDateTime(String text) {
-        return DateTimeParserBucket.parseLocalDateTime(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, text, this.requireParser());
+        return DateTimeParserBucket.parseLocalDateTime(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, text, this.iParser);
     }
 
     /**
@@ -823,7 +823,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(String text) {
-        return DateTimeParserBucket.parseDateTime(iChrono, iDefaultYear, iLocale, iOffsetParsed, iPivotYear, iZone, text, this.requireParser());
+        return DateTimeParserBucket.parseDateTime(iChrono, iDefaultYear, iLocale, iOffsetParsed, iPivotYear, iZone, text, this.iParser);
     }
 
     /**
@@ -844,21 +844,9 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(String text) {
-        return DateTimeParserBucket.parseMutableDateTime(iChrono, iDefaultYear, iLocale, iOffsetParsed, iPivotYear, iZone, text, this.requireParser());
+        return DateTimeParserBucket.parseMutableDateTime(iChrono, iDefaultYear, iLocale, iOffsetParsed, iPivotYear, iZone, text, this.iParser);
     }
 
-    /**
-     * Checks whether parsing is supported.
-     * 
-     * @throws UnsupportedOperationException if parsing is not supported
-     */
-    private InternalParser requireParser() {
-        InternalParser parser = iParser;
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        return parser;
-    }
     //-----------------------------------------------------------------------
 
 }
