@@ -9,12 +9,8 @@ final class SimpleParser {
             throw new UnsupportedOperationException("Parsing not supported");
         }
         int newPos = parser.parseInto(bucket, text, position);
-        instant.update(iZone, bucket.computeMillis(false, text), getBucketChronology(iOffsetParsed, bucket));
+        instant.update(iZone, bucket.computeMillis(false, text), bucket.getBucketChronology(iOffsetParsed));
         return newPos;
-    }
-
-    private static Chronology getBucketChronology(boolean iOffsetParsed, DateTimeParserBucket bucket) {
-        return ChronologyFactory.getChronology(iOffsetParsed, bucket.getChronology(), bucket.getOffsetInteger(), bucket.getZone());
     }
 
     static long parseMillis(CharSequence text, InternalParser parser, DateTimeParserBucket bucket) {
@@ -61,7 +57,7 @@ final class SimpleParser {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                DateTime dt = new DateTime(bucket.computeMillis(true, text), getBucketChronology(iOffsetParsed, bucket));
+                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
                 if (iZone != null) {
                     dt = dt.withZone(iZone);
                 }
@@ -81,7 +77,7 @@ final class SimpleParser {
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), getBucketChronology(iOffsetParsed, bucket));
+                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
                 if (iZone != null) {
                     dt.setZone(iZone);
                 }

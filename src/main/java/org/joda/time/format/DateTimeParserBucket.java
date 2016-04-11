@@ -144,6 +144,10 @@ public class DateTimeParserBucket {
         return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
     }
 
+    Chronology getBucketChronology(boolean iOffsetParsed) {
+        return ChronologyFactory.getChronology(iOffsetParsed, getChronology(), getOffsetInteger(), getZone());
+    }
+
 
     //-----------------------------------------------------------------------
     /**
