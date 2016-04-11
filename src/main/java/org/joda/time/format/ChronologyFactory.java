@@ -24,4 +24,10 @@ final class ChronologyFactory {
     static Chronology getChronologyWithTimeZone(Chronology chrono, DateTimeZone defaultTimeZone) {
         return (defaultTimeZone != null) ? chrono.withZone(defaultTimeZone) : chrono;
     }
+
+    static Chronology getChronology(boolean iOffsetParsed, Chronology chrono, Integer offsetInteger, DateTimeZone zone) {
+        return (iOffsetParsed && offsetInteger != null) ?
+                chrono.withZone(DateTimeZone.forOffsetMillis(offsetInteger)) :
+                (zone != null) ? chrono.withZone(zone) : chrono;
+    }
 }
