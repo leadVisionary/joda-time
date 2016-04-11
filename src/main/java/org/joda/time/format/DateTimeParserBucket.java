@@ -129,14 +129,6 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
-    static MutableDateTime getMutableDateTime(DateTimeZone iZone, long l, Chronology chronology) {
-        MutableDateTime dt = new MutableDateTime(l, chronology);
-        if (iZone != null) {
-            dt.setZone(iZone);
-        }
-        return dt;
-    }
-
     static int parseIntoReadWriteableInstant(Chronology iChrono, Locale iLocale, boolean iOffsetParsed, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser) {
         if (instant == null) {
             throw new IllegalArgumentException("Instant must not be null");
@@ -232,6 +224,14 @@ public class DateTimeParserBucket {
 
     private MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, Chronology chrono) {
         return getMutableDateTime(iZone, computeMillis(true, text), getChronology(iOffsetParsed, chrono));
+    }
+
+    static MutableDateTime getMutableDateTime(DateTimeZone iZone, long l, Chronology chronology) {
+        MutableDateTime dt = new MutableDateTime(l, chronology);
+        if (iZone != null) {
+            dt.setZone(iZone);
+        }
+        return dt;
     }
 
 
