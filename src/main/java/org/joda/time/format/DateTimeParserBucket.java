@@ -104,11 +104,10 @@ public class DateTimeParserBucket {
 
     public DateTimeParserBucket(ReadWritableInstant instant,
                                 Chronology iChrono,
-                                DateTimeZone iZone,
                                 Locale iLocale,
                                 Integer iPivotYear) {
         this(instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis()),
-             ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology()),
+             iChrono,
              iLocale,
              iPivotYear,
              DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis())
