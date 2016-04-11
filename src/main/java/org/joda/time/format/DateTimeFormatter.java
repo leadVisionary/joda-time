@@ -735,11 +735,10 @@ public class DateTimeFormatter {
         if (instant == null) {
             throw new IllegalArgumentException("Instant must not be null");
         }
-        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
         long instantLocal = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
 
         DateTimeParserBucket bucket = new DateTimeParserBucket(
-                instantLocal, ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology()), iLocale, iPivotYear, defaultYear);
+                instantLocal, ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology()), iLocale, iPivotYear, DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis()));
         return bucket.parseIntoInstant(iOffsetParsed, iZone, instant, text, position, requireParser(), ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology()));
     }
 
