@@ -22,9 +22,6 @@ final class ChronologyFactory {
     }
 
     static Chronology getChronologyWithTimeZone(Chronology chrono, DateTimeZone defaultTimeZone) {
-        if (defaultTimeZone != null) {
-            chrono = chrono.withZone(defaultTimeZone);
-        }
-        return chrono;
+        return (defaultTimeZone != null) ? chrono.withZone(defaultTimeZone) : chrono;
     }
 }
