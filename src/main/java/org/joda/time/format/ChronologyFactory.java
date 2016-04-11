@@ -14,9 +14,7 @@ final class ChronologyFactory {
      * @return the actual chronology
      */
     static Chronology selectChronology(Chronology defaultChronology, DateTimeZone defaultTZ, Chronology chrono) {
-        chrono = getChronologyWithDefaultValue(defaultChronology, chrono);
-        chrono = getChronologyWithTimeZone(chrono, defaultTZ);
-        return chrono;
+        return getChronologyWithTimeZone(getChronologyWithDefaultValue(defaultChronology, chrono), defaultTZ);
     }
 
     static Chronology getChronologyWithDefaultValue(Chronology defaultChronology, Chronology chrono) {
