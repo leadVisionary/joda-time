@@ -14,6 +14,9 @@ final class SimpleParser {
     }
 
     static long parseMillis(CharSequence text, InternalParser parser, DateTimeParserBucket bucket) {
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
@@ -26,15 +29,15 @@ final class SimpleParser {
     }
 
     static LocalDateTime parseLocalDateTime(CharSequence text, InternalParser parser, DateTimeParserBucket bucket) {
-        Chronology chrono = bucket.getChronology();
-
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
         }
+
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
                 long millis = bucket.computeMillis(true, text);
+                Chronology chrono = bucket.getChronology();
                 if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
                     int parsedOffset = bucket.getOffsetInteger();
                     DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
