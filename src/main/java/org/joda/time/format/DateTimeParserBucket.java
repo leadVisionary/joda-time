@@ -129,21 +129,6 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
-    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone) {
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
-        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
-    }
-
-    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant) {
-        if (instant == null) {
-            throw new IllegalArgumentException("Instant must not be null");
-        }
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology());
-        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
-        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
-        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
-    }
-
     Chronology getBucketChronology(boolean iOffsetParsed) {
         Chronology chrono = getChronology();
         Integer offsetInteger = getOffsetInteger();
@@ -187,11 +172,13 @@ public class DateTimeParserBucket {
      * @throws IllegalArgumentException if the text to parse is invalid
      * @since 2.4
      */
-    public long parseMillis(DateTimeParser parser, CharSequence text) {
+    public long parseMillis(DateTimeParser parser, final CharSequence text) {
         reset();
-        return SimpleParser.parseMillis(
-                text,
-                DateTimeParserInternalParser.of(parser), getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+        final DateTimeFormatter formatter = new DateTimeFormatter(null, parser)
+                .withChronology(getChronology())
+                .withLocale(getLocale())
+                .withZone(getZone());
+        return SimpleParser.parseMillisFrom(formatter, text.toString());
     }
 
     //-----------------------------------------------------------------------

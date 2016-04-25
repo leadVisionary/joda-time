@@ -127,15 +127,13 @@ public class DateTimeFormatter {
      */
     DateTimeFormatter(
             InternalPrinter printer, InternalParser parser) {
-        super();
-        iPrinter = printer;
-        iParser = parser;
-        iLocale = null;
-        iOffsetParsed = false;
-        iChrono = null;
-        iZone = null;
-        iPivotYear = null;
-        iDefaultYear = 2000;
+        this(printer, parser,
+                null,
+                false,
+                null,
+                null,
+                null,
+                2000);
     }
 
     /**
@@ -732,7 +730,22 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if any field is out of range
      */
     public int parseInto(ReadWritableInstant instant, String text, int position) {
-        return SimpleParser.parseIntoReadWriteableInstant(iOffsetParsed, iZone, instant, text, position, iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iLocale, iPivotYear, iZone, instant));
+        if (instant == null) {
+            throw new IllegalArgumentException("Instant must not be null");
+        }
+
+        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
+        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
+        Chronology chrono = ChronologyFactory.selectChronology(getChronology(), getZone(), instant.getChronology());
+        DateTimeParserBucket bucket = new DateTimeParserBucket(millis, chrono, getLocale(), getPivotYear(), defaultYear)
+;
+        DateTimeParser parser = getParser();
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = parser.parseInto(bucket, text, position);
+        instant.update(getZone(), bucket.computeMillis(false, text), bucket.getBucketChronology(isOffsetParsed()));
+        return newPos;
     }
 
     /**
@@ -747,8 +760,8 @@ public class DateTimeFormatter {
      * @throws UnsupportedOperationException if parsing is not supported
      * @throws IllegalArgumentException if the text to parse is invalid
      */
-    public long parseMillis(String text) {
-        return SimpleParser.parseMillis(text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public long parseMillis(final String text) {
+        return SimpleParser.parseMillisFrom(this, text);
     }
 
     /**
@@ -801,8 +814,8 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      * @since 2.0
      */
-    public LocalDateTime parseLocalDateTime(String text) {
-        return SimpleParser.parseLocalDateTime(text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public LocalDateTime parseLocalDateTime(final String text) {
+        return SimpleParser.parseIntoLocalDateTime(this, text);
     }
 
     /**
@@ -822,8 +835,8 @@ public class DateTimeFormatter {
      * @throws UnsupportedOperationException if parsing is not supported
      * @throws IllegalArgumentException if the text to parse is invalid
      */
-    public DateTime parseDateTime(String text) {
-        return SimpleParser.parseDateTime(iOffsetParsed, iZone, text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public DateTime parseDateTime(final String text) {
+        return SimpleParser.getDateTime(this, text);
     }
 
     /**
@@ -843,10 +856,7 @@ public class DateTimeFormatter {
      * @throws UnsupportedOperationException if parsing is not supported
      * @throws IllegalArgumentException if the text to parse is invalid
      */
-    public MutableDateTime parseMutableDateTime(String text) {
-        return SimpleParser.parseMutableDateTime(iOffsetParsed, iZone, text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public MutableDateTime parseMutableDateTime(final String text) {
+        return SimpleParser.getMutableDateTime(this, text);
     }
-
-    //-----------------------------------------------------------------------
-
 }
