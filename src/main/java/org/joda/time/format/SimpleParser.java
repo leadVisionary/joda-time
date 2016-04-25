@@ -15,23 +15,13 @@ final class SimpleParser {
         return newPos;
     }
 
-    static long parseMillis(CharSequence text, InternalParser parser, DateTimeParserBucket bucket) {
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        int newPos = parser.parseInto(bucket, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
-                return getMillis(text, bucket);
+    static long parseMillis(final CharSequence text, final InternalParser parser, final DateTimeParserBucket bucket) {
+        final Callable<Long> callback = new Callable<Long>() {
+            public Long call() throws Exception {
+                return bucket.computeMillis(true, text);
             }
-        } else {
-            newPos = ~newPos;
-        }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
-    }
-
-    private static long getMillis(CharSequence text, DateTimeParserBucket bucket) {
-        return bucket.computeMillis(true, text);
+        };
+        return getResult(text.toString(), parser, bucket, callback);
     }
 
     static LocalDateTime parseLocalDateTime(final CharSequence text,
@@ -39,7 +29,7 @@ final class SimpleParser {
                                             final DateTimeParserBucket bucket) {
         final Callable<LocalDateTime> callback = new Callable<LocalDateTime>() {
             public LocalDateTime call() throws Exception {
-                long millis = getMillis(text, bucket);
+                long millis = bucket.computeMillis(true, text);
                 Chronology chrono = bucket.getChronology();
                 if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
                     int parsedOffset = bucket.getOffsetInteger();
@@ -95,7 +85,9 @@ final class SimpleParser {
                 try {
                     return callable.call();
                 } catch (Exception e) {
-
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException)e;
+                    }
                 }
             }
         } else {
