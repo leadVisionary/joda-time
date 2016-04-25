@@ -15,12 +15,7 @@ final class SimpleParser {
         return newPos;
     }
 
-    static long parseMillis(final CharSequence text, final InternalParser parser, final DateTimeParserBucket bucket) {
-        final Callable<Long> callback = new Callable<Long>() {
-            public Long call() throws Exception {
-                return bucket.computeMillis(true, text);
-            }
-        };
+    static long parseMillis(final CharSequence text, final InternalParser parser, final DateTimeParserBucket bucket, Callable<Long> callback) {
         return getResult(text.toString(), parser, bucket, callback);
     }
 

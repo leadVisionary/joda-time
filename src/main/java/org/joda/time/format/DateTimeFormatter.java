@@ -18,6 +18,7 @@ package org.joda.time.format;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -747,8 +748,14 @@ public class DateTimeFormatter {
      * @throws UnsupportedOperationException if parsing is not supported
      * @throws IllegalArgumentException if the text to parse is invalid
      */
-    public long parseMillis(String text) {
-        return SimpleParser.parseMillis(text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public long parseMillis(final String text) {
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final Callable<Long> callback = new Callable<Long>() {
+            public Long call() throws Exception {
+                return bucket.computeMillis(true, text);
+            }
+        };
+        return SimpleParser.parseMillis(text, this.iParser, bucket, callback);
     }
 
     /**

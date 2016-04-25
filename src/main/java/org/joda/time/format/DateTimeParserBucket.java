@@ -17,6 +17,7 @@ package org.joda.time.format;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import org.joda.time.*;
 
@@ -187,11 +188,15 @@ public class DateTimeParserBucket {
      * @throws IllegalArgumentException if the text to parse is invalid
      * @since 2.4
      */
-    public long parseMillis(DateTimeParser parser, CharSequence text) {
+    public long parseMillis(DateTimeParser parser, final CharSequence text) {
         reset();
-        return SimpleParser.parseMillis(
-                text,
-                DateTimeParserInternalParser.of(parser), getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+        final DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final Callable<Long> callback = new Callable<Long>() {
+            public Long call() throws Exception {
+                return bucket.computeMillis(true, text);
+            }
+        };
+        return SimpleParser.parseMillis(text, DateTimeParserInternalParser.of(parser), bucket, callback);
     }
 
     //-----------------------------------------------------------------------
