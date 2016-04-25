@@ -2,6 +2,8 @@ package org.joda.time.format;
 
 import org.joda.time.*;
 
+import java.util.concurrent.Callable;
+
 final class SimpleParser {
 
     static int parseIntoReadWriteableInstant(boolean iOffsetParsed, DateTimeZone iZone, ReadWritableInstant instant, String text, int position, InternalParser parser, DateTimeParserBucket bucket) {
@@ -84,15 +86,32 @@ final class SimpleParser {
         return dt;
     }
 
-    static MutableDateTime parseMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, DateTimeParserBucket bucket) {
+    static MutableDateTime parseMutableDateTime(final boolean iOffsetParsed, final DateTimeZone iZone, final String text, InternalParser parser, final DateTimeParserBucket bucket) {
+        final Callable<MutableDateTime> callback = new Callable<MutableDateTime>() {
+            public MutableDateTime call() throws Exception {
+                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
+                if (iZone != null) {
+                    dt.setZone(iZone);
+                }
+                return dt;
+            }
+        };
 
+        return getResult(text, parser, bucket, callback);
+    }
+
+    private static <T> T getResult(String text, InternalParser parser, DateTimeParserBucket bucket, Callable<T> callable) {
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
         }
         int newPos = parser.parseInto(bucket, text, 0);
         if (newPos >= 0) {
             if (newPos >= text.length()) {
-                return getMutableDateTime(iOffsetParsed, iZone, text, bucket);
+                try {
+                    return callable.call();
+                } catch (Exception e) {
+
+                }
             }
         } else {
             newPos = ~newPos;
@@ -100,11 +119,4 @@ final class SimpleParser {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    private static MutableDateTime getMutableDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, DateTimeParserBucket bucket) {
-        MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
-        if (iZone != null) {
-            dt.setZone(iZone);
-        }
-        return dt;
-    }
 }
