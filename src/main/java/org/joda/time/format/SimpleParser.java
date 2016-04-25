@@ -39,23 +39,19 @@ final class SimpleParser {
                                             final DateTimeParserBucket bucket) {
         final Callable<LocalDateTime> callback = new Callable<LocalDateTime>() {
             public LocalDateTime call() throws Exception {
-                return getLocalDateTime(text, bucket);
+                long millis = getMillis(text, bucket);
+                Chronology chrono = bucket.getChronology();
+                if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
+                    int parsedOffset = bucket.getOffsetInteger();
+                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
+                    chrono = chrono.withZone(parsedZone);
+                } else if (bucket.getZone() != null) {
+                    chrono = chrono.withZone(bucket.getZone());
+                }
+                return new LocalDateTime(millis, chrono);
             }
         };
         return getResult(text.toString(), parser, bucket, callback);
-    }
-
-    private static LocalDateTime getLocalDateTime(CharSequence text, DateTimeParserBucket bucket) {
-        long millis = getMillis(text, bucket);
-        Chronology chrono = bucket.getChronology();
-        if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
-            int parsedOffset = bucket.getOffsetInteger();
-            DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
-            chrono = chrono.withZone(parsedZone);
-        } else if (bucket.getZone() != null) {
-            chrono = chrono.withZone(bucket.getZone());
-        }
-        return new LocalDateTime(millis, chrono);
     }
 
     static DateTime parseDateTime(final boolean iOffsetParsed,
