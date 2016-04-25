@@ -34,20 +34,15 @@ final class SimpleParser {
         return bucket.computeMillis(true, text);
     }
 
-    static LocalDateTime parseLocalDateTime(CharSequence text, InternalParser parser, DateTimeParserBucket bucket) {
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-
-        int newPos = parser.parseInto(bucket, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
+    static LocalDateTime parseLocalDateTime(final CharSequence text,
+                                            final InternalParser parser,
+                                            final DateTimeParserBucket bucket) {
+        final Callable<LocalDateTime> callback = new Callable<LocalDateTime>() {
+            public LocalDateTime call() throws Exception {
                 return getLocalDateTime(text, bucket);
             }
-        } else {
-            newPos = ~newPos;
-        }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
+        };
+        return getResult(text.toString(), parser, bucket, callback);
     }
 
     private static LocalDateTime getLocalDateTime(CharSequence text, DateTimeParserBucket bucket) {
