@@ -191,12 +191,11 @@ public class DateTimeParserBucket {
     public long parseMillis(DateTimeParser parser, final CharSequence text) {
         reset();
         final DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
-        final Callable<Long> callback = new Callable<Long>() {
+        return SimpleParser.parseMillis(text, DateTimeParserInternalParser.of(parser), bucket, new Callable<Long>() {
             public Long call() throws Exception {
                 return bucket.computeMillis(true, text);
             }
-        };
-        return SimpleParser.parseMillis(text, DateTimeParserInternalParser.of(parser), bucket, callback);
+        });
     }
 
     //-----------------------------------------------------------------------

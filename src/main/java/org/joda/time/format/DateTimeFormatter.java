@@ -733,7 +733,13 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if any field is out of range
      */
     public int parseInto(ReadWritableInstant instant, String text, int position) {
-        return SimpleParser.parseIntoReadWriteableInstant(iOffsetParsed, iZone, instant, text, position, iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iLocale, iPivotYear, iZone, instant));
+        DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iLocale, iPivotYear, iZone, instant);
+        if (iParser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = iParser.parseInto(bucket, text, position);
+        instant.update(iZone, bucket.computeMillis(false, text), bucket.getBucketChronology(iOffsetParsed));
+        return newPos;
     }
 
     /**
@@ -808,8 +814,23 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      * @since 2.0
      */
-    public LocalDateTime parseLocalDateTime(String text) {
-        return SimpleParser.parseLocalDateTime(text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public LocalDateTime parseLocalDateTime(final String text) {
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final Callable<LocalDateTime> callback = new Callable<LocalDateTime>() {
+            public LocalDateTime call() throws Exception {
+                long millis = bucket.computeMillis(true, text);
+                Chronology chrono = bucket.getChronology();
+                if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
+                    int parsedOffset = bucket.getOffsetInteger();
+                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
+                    chrono = chrono.withZone(parsedZone);
+                } else if (bucket.getZone() != null) {
+                    chrono = chrono.withZone(bucket.getZone());
+                }
+                return new LocalDateTime(millis, chrono);
+            }
+        };
+        return SimpleParser.parseLocalDateTime(text, this.iParser, bucket, callback);
     }
 
     /**
@@ -829,8 +850,18 @@ public class DateTimeFormatter {
      * @throws UnsupportedOperationException if parsing is not supported
      * @throws IllegalArgumentException if the text to parse is invalid
      */
-    public DateTime parseDateTime(String text) {
-        return SimpleParser.parseDateTime(iOffsetParsed, iZone, text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public DateTime parseDateTime(final String text) {
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final Callable<DateTime> callback = new Callable<DateTime>() {
+            public DateTime call() throws Exception {
+                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
+                if (iZone != null) {
+                    dt = dt.withZone(iZone);
+                }
+                return dt;
+            }
+        };
+        return SimpleParser.parseDateTime(text, this.iParser, bucket, callback);
     }
 
     /**
@@ -850,8 +881,18 @@ public class DateTimeFormatter {
      * @throws UnsupportedOperationException if parsing is not supported
      * @throws IllegalArgumentException if the text to parse is invalid
      */
-    public MutableDateTime parseMutableDateTime(String text) {
-        return SimpleParser.parseMutableDateTime(iOffsetParsed, iZone, text, this.iParser, DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone));
+    public MutableDateTime parseMutableDateTime(final String text) {
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final Callable<MutableDateTime> callback = new Callable<MutableDateTime>() {
+            public MutableDateTime call() throws Exception {
+                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
+                if (iZone != null) {
+                    dt.setZone(iZone);
+                }
+                return dt;
+            }
+        };
+        return SimpleParser.parseMutableDateTime(text, this.iParser, bucket, callback);
     }
 
     //-----------------------------------------------------------------------
