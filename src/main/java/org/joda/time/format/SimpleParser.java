@@ -70,18 +70,14 @@ final class SimpleParser {
                                   final DateTimeParserBucket bucket) {
         final Callable<DateTime> callback = new Callable<DateTime>() {
             public DateTime call() throws Exception {
-                return getDateTime(iOffsetParsed, iZone, text, bucket);
+                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
+                if (iZone != null) {
+                    dt = dt.withZone(iZone);
+                }
+                return dt;
             }
         };
         return getResult(text, parser, bucket, callback);
-    }
-
-    private static DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, DateTimeParserBucket bucket) {
-        DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
-        if (iZone != null) {
-            dt = dt.withZone(iZone);
-        }
-        return dt;
     }
 
     static MutableDateTime parseMutableDateTime(final boolean iOffsetParsed, final DateTimeZone iZone, final String text, InternalParser parser, final DateTimeParserBucket bucket) {
