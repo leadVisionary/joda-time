@@ -63,19 +63,17 @@ final class SimpleParser {
         return new LocalDateTime(millis, chrono);
     }
 
-    static DateTime parseDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, InternalParser parser, DateTimeParserBucket bucket) {
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        int newPos = parser.parseInto(bucket, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
+    static DateTime parseDateTime(final boolean iOffsetParsed,
+                                  final DateTimeZone iZone,
+                                  final String text,
+                                  final InternalParser parser,
+                                  final DateTimeParserBucket bucket) {
+        final Callable<DateTime> callback = new Callable<DateTime>() {
+            public DateTime call() throws Exception {
                 return getDateTime(iOffsetParsed, iZone, text, bucket);
             }
-        } else {
-            newPos = ~newPos;
-        }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
+        };
+        return getResult(text, parser, bucket, callback);
     }
 
     private static DateTime getDateTime(boolean iOffsetParsed, DateTimeZone iZone, String text, DateTimeParserBucket bucket) {
