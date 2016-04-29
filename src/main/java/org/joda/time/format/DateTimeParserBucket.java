@@ -178,7 +178,7 @@ public class DateTimeParserBucket {
                 .withChronology(getChronology())
                 .withLocale(getLocale())
                 .withZone(getZone());
-        return new SimpleParser(formatter).parseMillisFrom(text.toString());
+        return new MillsecondParsingStrategy(formatter).parse(text.toString());
     }
 
     //-----------------------------------------------------------------------

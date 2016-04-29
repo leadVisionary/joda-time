@@ -761,7 +761,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(final String text) {
-        return new SimpleParser(this).parseMillisFrom(text);
+        return new MillsecondParsingStrategy(this).parse(text);
     }
 
     /**
@@ -815,7 +815,7 @@ public class DateTimeFormatter {
      * @since 2.0
      */
     public LocalDateTime parseLocalDateTime(final String text) {
-        return new SimpleParser(this).parseIntoLocalDateTime(text);
+        return new LocalDateTimeParsingStrategy(this).parse(text);
     }
 
     /**
@@ -836,7 +836,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(final String text) {
-        return new SimpleParser(this).getDateTime(text);
+        return new DateTimeParsingStrategy(this).parse(text);
     }
 
     /**
@@ -857,6 +857,6 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(final String text) {
-        return new SimpleParser(this).getMutableDateTime(text);
+        return new MutableDateTimeParsingStrategy(this).parse(text);
     }
 }
