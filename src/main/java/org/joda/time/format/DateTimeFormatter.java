@@ -842,6 +842,6 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(final String text) {
-        return DateTimeParserBucket.getMutableDateTime(this, text);
+        return SimpleParser.getMutableDateTime(this, text);
     }
 }

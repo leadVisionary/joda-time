@@ -88,4 +88,24 @@ final class SimpleParser {
         };
         return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
+
+    static MutableDateTime getMutableDateTime(final DateTimeFormatter dateTimeFormatter, final String text) {
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(
+                dateTimeFormatter.getChronology(),
+                dateTimeFormatter.getDefaultYear(),
+                dateTimeFormatter.getLocale(),
+                dateTimeFormatter.getPivotYear(),
+                dateTimeFormatter.getZone(), 0);
+
+        final Callable<MutableDateTime> callback = new Callable<MutableDateTime>() {
+            public MutableDateTime call() throws Exception {
+                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
+                if (dateTimeFormatter.getZone() != null) {
+                    dt.setZone(dateTimeFormatter.getZone());
+                }
+                return dt;
+            }
+        };
+        return parseMutableDateTime(text, dateTimeFormatter.getParser0(), bucket, callback);
+    }
 }
