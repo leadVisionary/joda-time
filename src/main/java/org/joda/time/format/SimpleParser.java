@@ -21,13 +21,6 @@ final class SimpleParser {
         return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 
-    static LocalDateTime parseLocalDateTime(final CharSequence text,
-                                            final InternalParser parser,
-                                            final DateTimeParserBucket bucket,
-                                            final Callable<LocalDateTime> callback) {
-        return getResult(text.toString(), parser, bucket, callback);
-    }
-
     static DateTime parseDateTime(final String text,
                                   final InternalParser parser,
                                   final DateTimeParserBucket bucket,
@@ -81,6 +74,6 @@ final class SimpleParser {
                 return new LocalDateTime(millis, chrono);
             }
         };
-        return parseLocalDateTime(text, dateTimeFormatter.getParser0(), bucket, callback);
+        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 }
