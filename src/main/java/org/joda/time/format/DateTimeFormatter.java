@@ -731,13 +731,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if any field is out of range
      */
     public int parseInto(ReadWritableInstant instant, String text, int position) {
-        DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iLocale, iPivotYear, iZone, instant);
-        if (iParser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        int newPos = iParser.parseInto(bucket, text, position);
-        instant.update(iZone, bucket.computeMillis(false, text), bucket.getBucketChronology(iOffsetParsed));
-        return newPos;
+        return DateTimeParserBucket.updateInstantAndReturnPosition(this, instant, text, position);
     }
 
     /**
@@ -753,7 +747,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(final String text) {
-        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
         final Callable<Long> callback = new Callable<Long>() {
             public Long call() throws Exception {
                 return bucket.computeMillis(true, text);
@@ -813,7 +807,7 @@ public class DateTimeFormatter {
      * @since 2.0
      */
     public LocalDateTime parseLocalDateTime(final String text) {
-        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
         final Callable<LocalDateTime> callback = new Callable<LocalDateTime>() {
             public LocalDateTime call() throws Exception {
                 long millis = bucket.computeMillis(true, text);
@@ -849,7 +843,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(final String text) {
-        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
         final Callable<DateTime> callback = new Callable<DateTime>() {
             public DateTime call() throws Exception {
                 DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
@@ -880,7 +874,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(final String text) {
-        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
         final Callable<MutableDateTime> callback = new Callable<MutableDateTime>() {
             public MutableDateTime call() throws Exception {
                 MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));

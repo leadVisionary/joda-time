@@ -130,19 +130,23 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
-    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone) {
+    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, long millis) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
-        return new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
+        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, iDefaultYear);
     }
 
-    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, ReadWritableInstant instant) {
+    static int updateInstantAndReturnPosition(DateTimeFormatter dateTimeFormatter, ReadWritableInstant instant, String text, int position) {
         if (instant == null) {
             throw new IllegalArgumentException("Instant must not be null");
         }
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, instant.getChronology());
+
         long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
         int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
-        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, defaultYear);
+        Chronology chrono = ChronologyFactory.selectChronology(dateTimeFormatter.getChronology(), dateTimeFormatter.getZone(), instant.getChronology());
+        DateTimeParserBucket bucket = getDateTimeParserBucket(chrono, defaultYear, dateTimeFormatter.getLocale(),
+                dateTimeFormatter.getPivotYear(),
+                dateTimeFormatter.getZone(), millis);
+        return parseIntoInstant(bucket, instant, text, position, dateTimeFormatter);
     }
 
     Chronology getBucketChronology(boolean iOffsetParsed) {
@@ -190,7 +194,7 @@ public class DateTimeParserBucket {
      */
     public long parseMillis(DateTimeParser parser, final CharSequence text) {
         reset();
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone);
+        final DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
         return SimpleParser.parseMillis(text, DateTimeParserInternalParser.of(parser), bucket, new Callable<Long>() {
             public Long call() throws Exception {
                 return bucket.computeMillis(true, text);
@@ -516,6 +520,16 @@ public class DateTimeParserBucket {
                 }
             }
         }
+    }
+
+    static int parseIntoInstant(DateTimeParserBucket dateTimeParserBucket, ReadWritableInstant instant, String text, int position, DateTimeFormatter dateTimeFormatter) {
+        DateTimeParser parser = dateTimeFormatter.getParser();
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = parser.parseInto(dateTimeParserBucket, text, position);
+        instant.update(dateTimeFormatter.getZone(), dateTimeParserBucket.computeMillis(false, text), dateTimeParserBucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
+        return newPos;
     }
 
     class SavedState {
