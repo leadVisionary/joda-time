@@ -128,15 +128,13 @@ public class DateTimeFormatter {
      */
     DateTimeFormatter(
             InternalPrinter printer, InternalParser parser) {
-        super();
-        iPrinter = printer;
-        iParser = parser;
-        iLocale = null;
-        iOffsetParsed = false;
-        iChrono = null;
-        iZone = null;
-        iPivotYear = null;
-        iDefaultYear = 2000;
+        this(printer, parser,
+                null,
+                false,
+                null,
+                null,
+                null,
+                2000);
     }
 
     /**
