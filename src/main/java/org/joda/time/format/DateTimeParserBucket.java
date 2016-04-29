@@ -155,21 +155,6 @@ public class DateTimeParserBucket {
         return newPos;
     }
 
-    static long parseMillisFrom(DateTimeFormatter dateTimeFormatter, final String text) {
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(
-                dateTimeFormatter.getChronology(),
-                dateTimeFormatter.getDefaultYear(),
-                dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), 0);
-        final Callable<Long> callback = new Callable<Long>() {
-            public Long call() throws Exception {
-                return bucket.computeMillis(true, text);
-            }
-        };
-        return SimpleParser.parseMillis(text, dateTimeFormatter.getParser0(), bucket, callback);
-    }
-
     static LocalDateTime parseIntoLocalDateTime(DateTimeFormatter dateTimeFormatter, final String text) {
         final DateTimeParserBucket bucket = getDateTimeParserBucket(
                 dateTimeFormatter.getChronology(),
@@ -278,12 +263,11 @@ public class DateTimeParserBucket {
      */
     public long parseMillis(DateTimeParser parser, final CharSequence text) {
         reset();
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
-        return SimpleParser.parseMillis(text, DateTimeParserInternalParser.of(parser), bucket, new Callable<Long>() {
-            public Long call() throws Exception {
-                return bucket.computeMillis(true, text);
-            }
-        });
+        DateTimeFormatter formatter = new DateTimeFormatter(null, parser)
+                .withChronology(getChronology())
+                .withLocale(getLocale())
+                .withZone(getZone());
+        return SimpleParser.parseMillisFrom(formatter, text.toString());
     }
 
     //-----------------------------------------------------------------------

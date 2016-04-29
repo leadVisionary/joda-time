@@ -6,6 +6,21 @@ import java.util.concurrent.Callable;
 
 final class SimpleParser {
 
+    static long parseMillisFrom(DateTimeFormatter dateTimeFormatter, final String text) {
+        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(
+                dateTimeFormatter.getChronology(),
+                dateTimeFormatter.getDefaultYear(),
+                dateTimeFormatter.getLocale(),
+                dateTimeFormatter.getPivotYear(),
+                dateTimeFormatter.getZone(), 0);
+        final Callable<Long> callback = new Callable<Long>() {
+            public Long call() throws Exception {
+                return bucket.computeMillis(true, text);
+            }
+        };
+        return parseMillis(text, dateTimeFormatter.getParser0(), bucket, callback);
+    }
+
     static long parseMillis(final CharSequence text, final InternalParser parser, final DateTimeParserBucket bucket, Callable<Long> callback) {
         return getResult(text.toString(), parser, bucket, callback);
     }

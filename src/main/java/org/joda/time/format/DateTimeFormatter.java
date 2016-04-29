@@ -746,7 +746,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(final String text) {
-        return DateTimeParserBucket.parseMillisFrom(this, text);
+        return SimpleParser.parseMillisFrom(this, text);
     }
 
     /**
