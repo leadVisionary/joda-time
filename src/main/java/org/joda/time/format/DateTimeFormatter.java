@@ -730,7 +730,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if any field is out of range
      */
     public int parseInto(ReadWritableInstant instant, String text, int position) {
-        return DateTimeParserBucket.updateInstantAndReturnPosition(this, instant, text, position);
+        return SimpleParser.updateInstantAndReturnPosition(this, instant, text, position);
     }
 
     /**

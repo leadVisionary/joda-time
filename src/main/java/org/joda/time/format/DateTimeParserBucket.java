@@ -17,7 +17,6 @@ package org.joda.time.format;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 
 import org.joda.time.*;
 
@@ -130,40 +129,6 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
-    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, long millis) {
-        Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
-        return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, iDefaultYear);
-    }
-
-    static int updateInstantAndReturnPosition(DateTimeFormatter dateTimeFormatter, ReadWritableInstant instant, String text, int position) {
-        if (instant == null) {
-            throw new IllegalArgumentException("Instant must not be null");
-        }
-
-        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
-        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
-        Chronology chrono = ChronologyFactory.selectChronology(dateTimeFormatter.getChronology(), dateTimeFormatter.getZone(), instant.getChronology());
-        DateTimeParserBucket bucket = getDateTimeParserBucket(chrono, defaultYear, dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), millis);
-        DateTimeParser parser = dateTimeFormatter.getParser();
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        int newPos = parser.parseInto(bucket, text, position);
-        instant.update(dateTimeFormatter.getZone(), bucket.computeMillis(false, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
-        return newPos;
-    }
-
-    Chronology getBucketChronology(boolean iOffsetParsed) {
-        Chronology chrono = getChronology();
-        Integer offsetInteger = getOffsetInteger();
-        DateTimeZone zone = getZone();
-        return (iOffsetParsed && offsetInteger != null) ?
-                chrono.withZone(DateTimeZone.forOffsetMillis(offsetInteger)) :
-                (zone != null) ? chrono.withZone(zone) : chrono;
-    }
-
 
     //-----------------------------------------------------------------------
     /**
@@ -200,7 +165,7 @@ public class DateTimeParserBucket {
      */
     public long parseMillis(DateTimeParser parser, final CharSequence text) {
         reset();
-        DateTimeFormatter formatter = new DateTimeFormatter(null, parser)
+        final DateTimeFormatter formatter = new DateTimeFormatter(null, parser)
                 .withChronology(getChronology())
                 .withLocale(getLocale())
                 .withZone(getZone());
