@@ -18,11 +18,7 @@ final class SimpleParser {
                 return bucket.computeMillis(true, text);
             }
         };
-        return parseMillis(text, dateTimeFormatter.getParser0(), bucket, callback);
-    }
-
-    static long parseMillis(final CharSequence text, final InternalParser parser, final DateTimeParserBucket bucket, Callable<Long> callback) {
-        return getResult(text.toString(), parser, bucket, callback);
+        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 
     static LocalDateTime parseLocalDateTime(final CharSequence text,
