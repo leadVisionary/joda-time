@@ -21,10 +21,6 @@ final class SimpleParser {
         return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 
-    static MutableDateTime parseMutableDateTime(final String text, InternalParser parser, final DateTimeParserBucket bucket, Callable<MutableDateTime> callback) {
-        return getResult(text, parser, bucket, callback);
-    }
-
     private static <T> T getResult(String text, InternalParser parser, DateTimeParserBucket bucket, Callable<T> callable) {
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
@@ -106,6 +102,6 @@ final class SimpleParser {
                 return dt;
             }
         };
-        return parseMutableDateTime(text, dateTimeFormatter.getParser0(), bucket, callback);
+        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 }
