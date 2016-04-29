@@ -155,25 +155,6 @@ public class DateTimeParserBucket {
         return newPos;
     }
 
-    static DateTime getDateTime(final DateTimeFormatter dateTimeFormatter, final String text) {
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(
-                dateTimeFormatter.getChronology(),
-                dateTimeFormatter.getDefaultYear(),
-                dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), 0);
-        final Callable<DateTime> callback = new Callable<DateTime>() {
-            public DateTime call() throws Exception {
-                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
-                if (dateTimeFormatter.getZone() != null) {
-                    dt = dt.withZone(dateTimeFormatter.getZone());
-                }
-                return dt;
-            }
-        };
-        return SimpleParser.parseDateTime(text, dateTimeFormatter.getParser0(), bucket, callback);
-    }
-
     static MutableDateTime getMutableDateTime(final DateTimeFormatter dateTimeFormatter, final String text) {
         final DateTimeParserBucket bucket = getDateTimeParserBucket(
                 dateTimeFormatter.getChronology(),
