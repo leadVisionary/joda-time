@@ -6,20 +6,26 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 
 final class SimpleParser {
+    private final DateTimeFormatter formatter;
+    private final DateTimeParserBucket bucket;
 
-    static long parseMillisFrom(DateTimeFormatter dateTimeFormatter, final String text) {
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(
-                dateTimeFormatter.getChronology(),
-                dateTimeFormatter.getDefaultYear(),
-                dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), 0);
+    SimpleParser(final DateTimeFormatter formatter) {
+        this.formatter = formatter;
+        this.bucket = getDateTimeParserBucket(
+                formatter.getChronology(),
+                formatter.getDefaultYear(),
+                formatter.getLocale(),
+                formatter.getPivotYear(),
+                formatter.getZone(), 0);
+    }
+
+    long parseMillisFrom(final String text) {
         final Callable<Long> callback = new Callable<Long>() {
             public Long call() throws Exception {
                 return bucket.computeMillis(true, text);
             }
         };
-        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
+        return getResult(text, formatter.getParser0(), bucket, callback);
     }
 
     private static <T> T getResult(String text, InternalParser parser, DateTimeParserBucket bucket, Callable<T> callable) {
@@ -43,13 +49,7 @@ final class SimpleParser {
         throw new IllegalArgumentException(FormatUtils.createErrorMessage(text, newPos));
     }
 
-    static LocalDateTime parseIntoLocalDateTime(DateTimeFormatter dateTimeFormatter, final String text) {
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(
-                dateTimeFormatter.getChronology(),
-                dateTimeFormatter.getDefaultYear(),
-                dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), 0);
+    LocalDateTime parseIntoLocalDateTime(final String text) {
         final Callable<LocalDateTime> callback = new Callable<LocalDateTime>() {
             public LocalDateTime call() throws Exception {
                 long millis = bucket.computeMillis(true, text);
@@ -64,46 +64,33 @@ final class SimpleParser {
                 return new LocalDateTime(millis, chrono);
             }
         };
-        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
+        return getResult(text, formatter.getParser0(), bucket, callback);
     }
 
-    static DateTime getDateTime(final DateTimeFormatter dateTimeFormatter, final String text) {
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(
-                dateTimeFormatter.getChronology(),
-                dateTimeFormatter.getDefaultYear(),
-                dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), 0);
+    DateTime getDateTime(final String text) {
         final Callable<DateTime> callback = new Callable<DateTime>() {
             public DateTime call() throws Exception {
-                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
-                if (dateTimeFormatter.getZone() != null) {
-                    dt = dt.withZone(dateTimeFormatter.getZone());
+                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(formatter.isOffsetParsed()));
+                if (formatter.getZone() != null) {
+                    dt = dt.withZone(formatter.getZone());
                 }
                 return dt;
             }
         };
-        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
+        return getResult(text, formatter.getParser0(), bucket, callback);
     }
 
-    static MutableDateTime getMutableDateTime(final DateTimeFormatter dateTimeFormatter, final String text) {
-        final DateTimeParserBucket bucket = getDateTimeParserBucket(
-                dateTimeFormatter.getChronology(),
-                dateTimeFormatter.getDefaultYear(),
-                dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), 0);
-
+    MutableDateTime getMutableDateTime(final String text) {
         final Callable<MutableDateTime> callback = new Callable<MutableDateTime>() {
             public MutableDateTime call() throws Exception {
-                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
-                if (dateTimeFormatter.getZone() != null) {
-                    dt.setZone(dateTimeFormatter.getZone());
+                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(formatter.isOffsetParsed()));
+                if (formatter.getZone() != null) {
+                    dt.setZone(formatter.getZone());
                 }
                 return dt;
             }
         };
-        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
+        return getResult(text, formatter.getParser0(), bucket, callback);
     }
 
     private static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, long millis) {
