@@ -146,16 +146,12 @@ public class DateTimeParserBucket {
         DateTimeParserBucket bucket = getDateTimeParserBucket(chrono, defaultYear, dateTimeFormatter.getLocale(),
                 dateTimeFormatter.getPivotYear(),
                 dateTimeFormatter.getZone(), millis);
-        return parseIntoInstant(bucket, instant, text, position, dateTimeFormatter);
-    }
-
-    static int parseIntoInstant(DateTimeParserBucket dateTimeParserBucket, ReadWritableInstant instant, String text, int position, DateTimeFormatter dateTimeFormatter) {
         DateTimeParser parser = dateTimeFormatter.getParser();
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
         }
-        int newPos = parser.parseInto(dateTimeParserBucket, text, position);
-        instant.update(dateTimeFormatter.getZone(), dateTimeParserBucket.computeMillis(false, text), dateTimeParserBucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
+        int newPos = parser.parseInto(bucket, text, position);
+        instant.update(dateTimeFormatter.getZone(), bucket.computeMillis(false, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
         return newPos;
     }
 
