@@ -174,6 +174,30 @@ public class DateTimeParserBucket {
         return SimpleParser.parseMillis(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 
+    static LocalDateTime parseIntoLocalDateTime(DateTimeFormatter dateTimeFormatter, final String text) {
+        final DateTimeParserBucket bucket = getDateTimeParserBucket(
+                dateTimeFormatter.getChronology(),
+                dateTimeFormatter.getDefaultYear(),
+                dateTimeFormatter.getLocale(),
+                dateTimeFormatter.getPivotYear(),
+                dateTimeFormatter.getZone(), 0);
+        final Callable<LocalDateTime> callback = new Callable<LocalDateTime>() {
+            public LocalDateTime call() throws Exception {
+                long millis = bucket.computeMillis(true, text);
+                Chronology chrono = bucket.getChronology();
+                if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
+                    int parsedOffset = bucket.getOffsetInteger();
+                    DateTimeZone parsedZone = DateTimeZone.forOffsetMillis(parsedOffset);
+                    chrono = chrono.withZone(parsedZone);
+                } else if (bucket.getZone() != null) {
+                    chrono = chrono.withZone(bucket.getZone());
+                }
+                return new LocalDateTime(millis, chrono);
+            }
+        };
+        return SimpleParser.parseLocalDateTime(text, dateTimeFormatter.getParser0(), bucket, callback);
+    }
+
     Chronology getBucketChronology(boolean iOffsetParsed) {
         Chronology chrono = getChronology();
         Integer offsetInteger = getOffsetInteger();
