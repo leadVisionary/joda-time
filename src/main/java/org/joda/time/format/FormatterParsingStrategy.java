@@ -17,14 +17,11 @@ abstract class FormatterParsingStrategy<T> implements ParsingStrategy<T> {
             throw new UnsupportedOperationException("Parsing not supported");
         }
         int newPos = formatter.getParser0().parseInto(bucket, text, 0);
-        if (newPos >= 0) {
-            if (newPos >= text.length()) {
-                return doParse(text);
-            }
+        if (newPos >= 0 && newPos >= text.length()) {
+            return doParse(text);
         } else {
-            newPos = ~newPos;
+            throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), ~newPos));
         }
-        throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), newPos));
     }
 
     protected abstract T doParse(CharSequence text);
