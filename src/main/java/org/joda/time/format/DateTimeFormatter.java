@@ -844,7 +844,4 @@ public class DateTimeFormatter {
     public MutableDateTime parseMutableDateTime(final String text) {
         return DateTimeParserBucket.getMutableDateTime(this, text);
     }
-
-    //-----------------------------------------------------------------------
-
 }
