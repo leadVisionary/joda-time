@@ -18,7 +18,6 @@ package org.joda.time.format;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -843,17 +842,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public MutableDateTime parseMutableDateTime(final String text) {
-        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
-        final Callable<MutableDateTime> callback = new Callable<MutableDateTime>() {
-            public MutableDateTime call() throws Exception {
-                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
-                if (iZone != null) {
-                    dt.setZone(iZone);
-                }
-                return dt;
-            }
-        };
-        return SimpleParser.parseMutableDateTime(text, this.iParser, bucket, callback);
+        return DateTimeParserBucket.getMutableDateTime(this, text);
     }
 
     //-----------------------------------------------------------------------
