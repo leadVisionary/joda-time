@@ -76,7 +76,7 @@ final class SimpleParser {
                 dateTimeFormatter.getZone(), 0);
         final Callable<DateTime> callback = new Callable<DateTime>() {
             public DateTime call() throws Exception {
-                DateTime dt = new DateTime(bucket.computeMillis(true, text), getBucketChronology(bucket, dateTimeFormatter.isOffsetParsed()));
+                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
                 if (dateTimeFormatter.getZone() != null) {
                     dt = dt.withZone(dateTimeFormatter.getZone());
                 }
@@ -96,7 +96,7 @@ final class SimpleParser {
 
         final Callable<MutableDateTime> callback = new Callable<MutableDateTime>() {
             public MutableDateTime call() throws Exception {
-                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), getBucketChronology(bucket, dateTimeFormatter.isOffsetParsed()));
+                MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
                 if (dateTimeFormatter.getZone() != null) {
                     dt.setZone(dateTimeFormatter.getZone());
                 }
@@ -106,37 +106,8 @@ final class SimpleParser {
         return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 
-    static int updateInstantAndReturnPosition(DateTimeFormatter dateTimeFormatter, ReadWritableInstant instant, String text, int position) {
-        if (instant == null) {
-            throw new IllegalArgumentException("Instant must not be null");
-        }
-
-        long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
-        int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
-        Chronology chrono = ChronologyFactory.selectChronology(dateTimeFormatter.getChronology(), dateTimeFormatter.getZone(), instant.getChronology());
-        DateTimeParserBucket bucket = getDateTimeParserBucket(chrono, defaultYear, dateTimeFormatter.getLocale(),
-                dateTimeFormatter.getPivotYear(),
-                dateTimeFormatter.getZone(), millis);
-        DateTimeParser parser = dateTimeFormatter.getParser();
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        int newPos = parser.parseInto(bucket, text, position);
-        instant.update(dateTimeFormatter.getZone(), bucket.computeMillis(false, text), getBucketChronology(bucket, dateTimeFormatter.isOffsetParsed()));
-        return newPos;
-    }
-
-    static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, long millis) {
+    private static DateTimeParserBucket getDateTimeParserBucket(Chronology iChrono, int iDefaultYear, Locale iLocale, Integer iPivotYear, DateTimeZone iZone, long millis) {
         Chronology chrono = ChronologyFactory.selectChronology(iChrono, iZone, iChrono);
         return new DateTimeParserBucket(millis, chrono, iLocale, iPivotYear, iDefaultYear);
-    }
-
-    static Chronology getBucketChronology(DateTimeParserBucket dateTimeParserBucket, boolean iOffsetParsed) {
-        Chronology chrono = dateTimeParserBucket.getChronology();
-        Integer offsetInteger = dateTimeParserBucket.getOffsetInteger();
-        DateTimeZone zone = dateTimeParserBucket.getZone();
-        return (iOffsetParsed && offsetInteger != null) ?
-                chrono.withZone(DateTimeZone.forOffsetMillis(offsetInteger)) :
-                (zone != null) ? chrono.withZone(zone) : chrono;
     }
 }

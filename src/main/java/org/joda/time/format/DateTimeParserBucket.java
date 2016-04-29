@@ -129,6 +129,15 @@ public class DateTimeParserBucket {
         iSavedFields = new SavedField[8];
     }
 
+    Chronology getBucketChronology(boolean iOffsetParsed) {
+        Chronology chrono = getChronology();
+        Integer offsetInteger = getOffsetInteger();
+        DateTimeZone zone = getZone();
+        return (iOffsetParsed && offsetInteger != null) ?
+                chrono.withZone(DateTimeZone.forOffsetMillis(offsetInteger)) :
+                (zone != null) ? chrono.withZone(zone) : chrono;
+    }
+
 
     //-----------------------------------------------------------------------
     /**
