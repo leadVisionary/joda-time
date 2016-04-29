@@ -822,17 +822,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public DateTime parseDateTime(final String text) {
-        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
-        final Callable<DateTime> callback = new Callable<DateTime>() {
-            public DateTime call() throws Exception {
-                DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(iOffsetParsed));
-                if (iZone != null) {
-                    dt = dt.withZone(iZone);
-                }
-                return dt;
-            }
-        };
-        return SimpleParser.parseDateTime(text, this.iParser, bucket, callback);
+        return DateTimeParserBucket.getDateTime(this, text);
     }
 
     /**
