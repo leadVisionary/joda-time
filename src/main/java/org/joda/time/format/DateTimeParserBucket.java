@@ -149,6 +149,31 @@ public class DateTimeParserBucket {
         return parseIntoInstant(bucket, instant, text, position, dateTimeFormatter);
     }
 
+    static int parseIntoInstant(DateTimeParserBucket dateTimeParserBucket, ReadWritableInstant instant, String text, int position, DateTimeFormatter dateTimeFormatter) {
+        DateTimeParser parser = dateTimeFormatter.getParser();
+        if (parser == null) {
+            throw new UnsupportedOperationException("Parsing not supported");
+        }
+        int newPos = parser.parseInto(dateTimeParserBucket, text, position);
+        instant.update(dateTimeFormatter.getZone(), dateTimeParserBucket.computeMillis(false, text), dateTimeParserBucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
+        return newPos;
+    }
+
+    static long parseMillisFrom(DateTimeFormatter dateTimeFormatter, final String text) {
+        final DateTimeParserBucket bucket = getDateTimeParserBucket(
+                dateTimeFormatter.getChronology(),
+                dateTimeFormatter.getDefaultYear(),
+                dateTimeFormatter.getLocale(),
+                dateTimeFormatter.getPivotYear(),
+                dateTimeFormatter.getZone(), 0);
+        final Callable<Long> callback = new Callable<Long>() {
+            public Long call() throws Exception {
+                return bucket.computeMillis(true, text);
+            }
+        };
+        return SimpleParser.parseMillis(text, dateTimeFormatter.getParser0(), bucket, callback);
+    }
+
     Chronology getBucketChronology(boolean iOffsetParsed) {
         Chronology chrono = getChronology();
         Integer offsetInteger = getOffsetInteger();
@@ -520,16 +545,6 @@ public class DateTimeParserBucket {
                 }
             }
         }
-    }
-
-    static int parseIntoInstant(DateTimeParserBucket dateTimeParserBucket, ReadWritableInstant instant, String text, int position, DateTimeFormatter dateTimeFormatter) {
-        DateTimeParser parser = dateTimeFormatter.getParser();
-        if (parser == null) {
-            throw new UnsupportedOperationException("Parsing not supported");
-        }
-        int newPos = parser.parseInto(dateTimeParserBucket, text, position);
-        instant.update(dateTimeFormatter.getZone(), dateTimeParserBucket.computeMillis(false, text), dateTimeParserBucket.getBucketChronology(dateTimeFormatter.isOffsetParsed()));
-        return newPos;
     }
 
     class SavedState {

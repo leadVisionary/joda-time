@@ -747,13 +747,7 @@ public class DateTimeFormatter {
      * @throws IllegalArgumentException if the text to parse is invalid
      */
     public long parseMillis(final String text) {
-        final DateTimeParserBucket bucket = DateTimeParserBucket.getDateTimeParserBucket(iChrono, iDefaultYear, iLocale, iPivotYear, iZone, 0);
-        final Callable<Long> callback = new Callable<Long>() {
-            public Long call() throws Exception {
-                return bucket.computeMillis(true, text);
-            }
-        };
-        return SimpleParser.parseMillis(text, this.iParser, bucket, callback);
+        return DateTimeParserBucket.parseMillisFrom(this, text);
     }
 
     /**
