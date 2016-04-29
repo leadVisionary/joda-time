@@ -8,26 +8,29 @@ final class ReadWriteableInstantParsingStrategy implements ParsingStrategy<Integ
     private final DateTimeFormatter formatter;
     private final ReadWritableInstant instant;
     private final int position;
+    private final DateTimeParserBucket bucket;
 
     ReadWriteableInstantParsingStrategy(DateTimeFormatter formatter, ReadWritableInstant instant, int position) {
         this.formatter = formatter;
-        this.instant = instant;
-        this.position = position;
-    }
-
-    public Integer parse(CharSequence text) {
         if (instant == null) {
             throw new IllegalArgumentException("Instant must not be null");
         }
+        this.instant = instant;
+        bucket = createBucket();
+        this.position = position;
+    }
 
+    private DateTimeParserBucket createBucket() {
         long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
         int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
         Chronology chrono = ChronologyFactory.selectChronology(formatter.getChronology(),
                 formatter.getZone(), instant.getChronology());
-        DateTimeParserBucket bucket = new DateTimeParserBucket(millis, chrono,
+        return new DateTimeParserBucket(millis, chrono,
                 formatter.getLocale(),
-                formatter.getPivotYear(), defaultYear)
-                ;
+                formatter.getPivotYear(), defaultYear);
+    }
+
+    public Integer parse(CharSequence text) {
         DateTimeParser parser = formatter.getParser();
         if (parser == null) {
             throw new UnsupportedOperationException("Parsing not supported");
