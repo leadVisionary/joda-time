@@ -21,13 +21,6 @@ final class SimpleParser {
         return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 
-    static DateTime parseDateTime(final String text,
-                                  final InternalParser parser,
-                                  final DateTimeParserBucket bucket,
-                                  final Callable<DateTime> callback) {
-        return getResult(text, parser, bucket, callback);
-    }
-
     static MutableDateTime parseMutableDateTime(final String text, InternalParser parser, final DateTimeParserBucket bucket, Callable<MutableDateTime> callback) {
         return getResult(text, parser, bucket, callback);
     }
@@ -93,6 +86,6 @@ final class SimpleParser {
                 return dt;
             }
         };
-        return parseDateTime(text, dateTimeFormatter.getParser0(), bucket, callback);
+        return getResult(text, dateTimeFormatter.getParser0(), bucket, callback);
     }
 }
