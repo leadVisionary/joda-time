@@ -800,7 +800,7 @@ public class DateTimeFormatter {
      * @since 2.0
      */
     public LocalDateTime parseLocalDateTime(final String text) {
-        return DateTimeParserBucket.parseIntoLocalDateTime(this, text);
+        return SimpleParser.parseIntoLocalDateTime(this, text);
     }
 
     /**
