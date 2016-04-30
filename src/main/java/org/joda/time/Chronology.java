@@ -503,4 +503,24 @@ public abstract class Chronology {
      */
     public abstract String toString();
 
+    /**
+     * Determines the correct chronology to use.
+     *
+     * @param defaultChronology a default value
+     * @param defaultTZ         @param chrono  the proposed chronology
+     * @return the actual chronology
+     */
+    public static Chronology selectChronology(Chronology defaultChronology, DateTimeZone defaultTZ, Chronology chrono) {
+        return getChronologyWithTimeZone(getChronologyWithDefaultValue(defaultChronology, chrono), defaultTZ);
+    }
+
+    private static Chronology getChronologyWithDefaultValue(Chronology defaultChronology, Chronology chrono) {
+        return (defaultChronology != null) ? defaultChronology : DateTimeUtils.getChronology(chrono);
+    }
+
+    private static Chronology getChronologyWithTimeZone(Chronology chrono, DateTimeZone defaultTimeZone) {
+        return (defaultTimeZone != null) ? chrono.withZone(defaultTimeZone) : chrono;
+    }
+
+
 }

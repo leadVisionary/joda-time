@@ -668,7 +668,7 @@ public class DateTimeFormatter {
 
     private void printTo(Appendable appendable, long instant, Chronology chrono) throws IOException {
         InternalPrinter printer = requirePrinter();
-        chrono = ChronologyFactory.selectChronology(iChrono, iZone, chrono);
+        chrono = Chronology.selectChronology(iChrono, iZone, chrono);
         // Shift instant into local time (UTC) to avoid excessive offset
         // calculations when printing multiple fields in a composite printer.
         DateTimeZone zone = chrono.getZone();

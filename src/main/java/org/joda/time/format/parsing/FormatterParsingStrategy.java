@@ -9,7 +9,7 @@ abstract class FormatterParsingStrategy<T> implements ParsingStrategy<T> {
 
     FormatterParsingStrategy(final DateTimeFormatter formatter) {
         this.formatter = formatter;
-        Chronology chrono = ChronologyFactory.selectChronology(formatter.getChronology(), formatter.getZone(), formatter.getChronology());
+        Chronology chrono = Chronology.selectChronology(formatter.getChronology(), formatter.getZone(), formatter.getChronology());
         this.bucket = new DateTimeParserBucket((long) 0, chrono, formatter.getLocale(), formatter.getPivotYear(), formatter.getDefaultYear());
     }
 
