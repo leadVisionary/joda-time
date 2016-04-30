@@ -1305,7 +1305,7 @@ public class DateTimeFormatterBuilder {
             calculator.calculate();
 
             bucket.saveField(iFieldType, calculator.getValue());
-            return calculator.getPosition();
+            return calculator.getCurrentPosition();
         }
 
     }

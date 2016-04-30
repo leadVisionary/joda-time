@@ -3,26 +3,26 @@ package org.joda.time.format;
 final class OffsetCalculator {
     private final CharSequence text;
     private final boolean isSigned;
-    private int position;
+    private int currentPosition;
     private int length;
     private boolean negative;
     private int limit;
     private int value;
 
     OffsetCalculator(final CharSequence text,
-                     final int iMaxParsedDigits,
-                     final boolean iSigned,
-                     final int position) {
+                     final int maximumDigitsToParse,
+                     final boolean isSigned,
+                     final int startingPosition) {
         this.text = text;
-        this.position = position;
+        this.currentPosition = startingPosition;
         length = 0;
         negative = false;
-        isSigned = iSigned;
-        limit = Math.min(iMaxParsedDigits, text.length() - position);
+        this.isSigned = isSigned;
+        limit = Math.min(maximumDigitsToParse, text.length() - startingPosition);
     }
 
-    int getPosition() {
-        return position;
+    int getCurrentPosition() {
+        return currentPosition;
     }
 
     int getValue() {
@@ -43,11 +43,11 @@ final class OffsetCalculator {
 
     private boolean shouldContinue() {
         final boolean hasSign = isPrefixedWithPlusOrMinus() && isSigned;
-        return Character.isDigit(text.charAt(position + length)) || hasSign;
+        return Character.isDigit(text.charAt(currentPosition + length)) || hasSign;
     }
 
     private boolean isPrefixedWithPlusOrMinus() {
-        final int index = position + length;
+        final int index = currentPosition + length;
         final char currentCharacter = text.charAt(index);
         final boolean isFirstCharacterOperator = length == 0 && isCharacterOperator(currentCharacter);
         final boolean hasNextDigitCharacter = index < text.length() - 1 && Character.isDigit(text.charAt(index + 1));
@@ -64,17 +64,17 @@ final class OffsetCalculator {
 
     private void updateBasedOnSign() {
         if (isPrefixedWithPlusOrMinus()) {
-            negative = text.charAt(position + length) == '-';
+            negative = text.charAt(currentPosition + length) == '-';
             length = negative ? length + 1 : length;
-            position = negative ? position : position + 1;
+            currentPosition = negative ? currentPosition : currentPosition + 1;
             // Expand the limit to disregard the sign character.
-            limit = Math.min(limit + 1, text.length() - position);
+            limit = Math.min(limit + 1, text.length() - currentPosition);
         }
     }
 
     private void updatePositionAndValue() {
         if (length == 0) {
-            position = ~position;
+            currentPosition = ~currentPosition;
         } else if (length >= 9) {
             useDefaultParser();
         } else {
@@ -85,20 +85,20 @@ final class OffsetCalculator {
     private void useDefaultParser() {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
-        final String toParse = text.subSequence(position, position + length).toString();
+        final String toParse = text.subSequence(currentPosition, currentPosition + length).toString();
         value = Integer.parseInt(toParse);
-        position += length;
+        currentPosition += length;
     }
 
     private void useFastParser() {
-        int i = negative ? position + 1 : position;
+        int i = negative ? currentPosition + 1 : currentPosition;
 
         final int index = i++;
         if (index < text.length()) {
-            position += length;
+            currentPosition += length;
             value = negative ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
-            position = ~position;
+            currentPosition = ~currentPosition;
         }
     }
 
@@ -106,7 +106,7 @@ final class OffsetCalculator {
         int startingIndex = i;
         int calculated = getAsciiCharacterFor(index);
 
-        while (startingIndex < position) {
+        while (startingIndex < currentPosition) {
             calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(startingIndex++);
         }
         return calculated;
