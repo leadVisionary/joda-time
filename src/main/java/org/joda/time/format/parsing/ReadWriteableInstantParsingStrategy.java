@@ -3,7 +3,6 @@ package org.joda.time.format.parsing;
 import org.joda.time.Chronology;
 import org.joda.time.DateTimeUtils;
 import org.joda.time.ReadWritableInstant;
-import org.joda.time.format.ChronologyFactory;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeParser;
 import org.joda.time.format.DateTimeParserBucket;
@@ -29,7 +28,7 @@ public final class ReadWriteableInstantParsingStrategy implements ParsingStrateg
     private DateTimeParserBucket createBucket() {
         long millis = instant.getMillis() + instant.getChronology().getZone().getOffset(instant.getMillis());
         int defaultYear = DateTimeUtils.getChronology(instant.getChronology()).year().get(instant.getMillis());
-        Chronology chrono = ChronologyFactory.selectChronology(formatter.getChronology(),
+        Chronology chrono = Chronology.selectChronology(formatter.getChronology(),
                 formatter.getZone(), instant.getChronology());
         return new DateTimeParserBucket(millis, chrono,
                 formatter.getLocale(),
