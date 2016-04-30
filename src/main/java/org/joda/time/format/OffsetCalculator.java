@@ -34,7 +34,12 @@ final class OffsetCalculator {
     private int calculateLength() {
         int length = 0;
         while (length < limit && shouldContinue(length)) {
-            updateBasedOnSign(length);
+            if (isPrefixedWithPlusOrMinus(length)) {
+                negative = text.charAt(currentPosition + length) == '-';
+                currentPosition = negative ? currentPosition : currentPosition + 1;
+                // Expand the limit to disregard the sign character.
+                limit = Math.min(limit + 1, text.length() - currentPosition);
+            }
             length = length + 1;
         }
         return length;
@@ -59,16 +64,6 @@ final class OffsetCalculator {
 
     private boolean isBeforeBoundary(int length) {
         return length + 1 <= limit;
-    }
-
-    private void updateBasedOnSign(int length) {
-        if (isPrefixedWithPlusOrMinus(length)) {
-            negative = text.charAt(currentPosition + length) == '-';
-            length = negative ? length + 1 : length;
-            currentPosition = negative ? currentPosition : currentPosition + 1;
-            // Expand the limit to disregard the sign character.
-            limit = Math.min(limit + 1, text.length() - currentPosition);
-        }
     }
 
     private void updatePositionAndValue(int length) {
