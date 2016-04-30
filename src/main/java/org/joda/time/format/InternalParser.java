@@ -23,34 +23,8 @@ package org.joda.time.format;
  *
  * @author Stephen Colebourne
  * @since 2.4
+ * @deprecated Use org.joda.time.format.parsing.InternalParser instead.
  */
-interface InternalParser {
-
-    /**
-     * Returns the expected maximum number of characters consumed.
-     * The actual amount should rarely exceed this estimate.
-     * 
-     * @return the estimated length
-     */
-    int estimateParsedLength();
-
-    /**
-     * Parse an element from the given text, saving any fields into the given
-     * DateTimeParserBucket. If the parse succeeds, the return value is the new
-     * text position. Note that the parse may succeed without fully reading the
-     * text.
-     * <p>
-     * If it fails, the return value is negative. To determine the position
-     * where the parse failed, apply the one's complement operator (~) on the
-     * return value.
-     *
-     * @param bucket  field are saved into this, not null
-     * @param text  the text to parse, not null
-     * @param position  position to start parsing from
-     * @return new position, negative value means parse failed -
-     *  apply complement operator (~) to get position of failure
-     * @throws IllegalArgumentException if any field is out of range
-     */
-    int parseInto(DateTimeParserBucket bucket, CharSequence text, int position);
-
+@Deprecated
+interface InternalParser extends org.joda.time.format.parsing.InternalParser {
 }

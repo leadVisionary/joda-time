@@ -1,12 +1,13 @@
-package org.joda.time.format;
+package org.joda.time.format.parsing;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormatter;
 
-final class LocalDateTimeParsingStrategy extends FormatterParsingStrategy<LocalDateTime> {
+public final class LocalDateTimeParsingStrategy extends FormatterParsingStrategy<LocalDateTime> {
 
-    LocalDateTimeParsingStrategy(DateTimeFormatter formatter) {
+    public LocalDateTimeParsingStrategy(final DateTimeFormatter formatter) {
         super(formatter);
     }
 

@@ -20,6 +20,8 @@ import java.util.Locale;
 
 import org.joda.time.*;
 
+import org.joda.time.format.parsing.MillsecondParsingStrategy;
+
 /**
  * DateTimeParserBucket is an advanced class, intended mainly for parser
  * implementations. It can also be used during normal parsing operations to
@@ -128,16 +130,6 @@ public class DateTimeParserBucket {
         iPivotYear = iDefaultPivotYear;
         iSavedFields = new SavedField[8];
     }
-
-    Chronology getBucketChronology(boolean iOffsetParsed) {
-        Chronology chrono = getChronology();
-        Integer offsetInteger = getOffsetInteger();
-        DateTimeZone zone = getZone();
-        return (iOffsetParsed && offsetInteger != null) ?
-                chrono.withZone(DateTimeZone.forOffsetMillis(offsetInteger)) :
-                (zone != null) ? chrono.withZone(zone) : chrono;
-    }
-
 
     //-----------------------------------------------------------------------
     /**
@@ -499,6 +491,15 @@ public class DateTimeParserBucket {
                 }
             }
         }
+    }
+
+    public Chronology getBucketChronology(boolean iOffsetParsed) {
+        Chronology chrono = getChronology();
+        Integer offsetInteger = getOffsetInteger();
+        DateTimeZone zone = getZone();
+        return (iOffsetParsed && offsetInteger != null) ?
+                chrono.withZone(DateTimeZone.forOffsetMillis(offsetInteger)) :
+                (zone != null) ? chrono.withZone(zone) : chrono;
     }
 
     class SavedState {
