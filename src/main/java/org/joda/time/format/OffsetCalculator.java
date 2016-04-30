@@ -2,7 +2,6 @@ package org.joda.time.format;
 
 final class OffsetCalculator {
     private final CharSequence text;
-    private final int maxParsedDigits;
     private final boolean isSigned;
     private int position;
     private int length;
@@ -18,8 +17,8 @@ final class OffsetCalculator {
         this.position = position;
         length = 0;
         negative = false;
-        maxParsedDigits = iMaxParsedDigits;
         isSigned = iSigned;
+        limit = Math.min(iMaxParsedDigits, text.length() - position);
     }
 
     int getPosition() {
@@ -36,7 +35,6 @@ final class OffsetCalculator {
     }
 
     private void calculateLength() {
-        limit = Math.min(maxParsedDigits, text.length() - position);
         while (length < limit && shouldContinue()) {
             updateBasedOnSign();
             length = length + 1;
