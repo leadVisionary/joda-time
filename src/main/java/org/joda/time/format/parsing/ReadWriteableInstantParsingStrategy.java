@@ -1,16 +1,22 @@
-package org.joda.time.format;
+package org.joda.time.format.parsing;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTimeUtils;
 import org.joda.time.ReadWritableInstant;
+import org.joda.time.format.ChronologyFactory;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeParser;
+import org.joda.time.format.DateTimeParserBucket;
 
-final class ReadWriteableInstantParsingStrategy implements ParsingStrategy<Integer> {
-    private final DateTimeFormatter formatter;
+public final class ReadWriteableInstantParsingStrategy implements ParsingStrategy<Integer> {
     private final ReadWritableInstant instant;
     private final int position;
+    private final DateTimeFormatter formatter;
     private final DateTimeParserBucket bucket;
 
-    ReadWriteableInstantParsingStrategy(DateTimeFormatter formatter, ReadWritableInstant instant, int position) {
+    public ReadWriteableInstantParsingStrategy(final DateTimeFormatter formatter,
+                                               final ReadWritableInstant instant,
+                                               final int position) {
         this.formatter = formatter;
         if (instant == null) {
             throw new IllegalArgumentException("Instant must not be null");

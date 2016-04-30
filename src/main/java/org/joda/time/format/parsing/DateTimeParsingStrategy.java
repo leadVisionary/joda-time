@@ -1,9 +1,10 @@
-package org.joda.time.format;
+package org.joda.time.format.parsing;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
 
-final class DateTimeParsingStrategy extends FormatterParsingStrategy<DateTime> {
-    DateTimeParsingStrategy(DateTimeFormatter formatter) {
+public final class DateTimeParsingStrategy extends FormatterParsingStrategy<DateTime> {
+    public DateTimeParsingStrategy(final DateTimeFormatter formatter) {
         super(formatter);
     }
 
