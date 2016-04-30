@@ -46,11 +46,12 @@ final class OffsetCalculator {
     }
 
     private boolean isPrefixedWithPlusOrMinus(int length) {
-        final int index = currentPosition + length;
-        final char currentCharacter = text.charAt(index);
-        final boolean isFirstCharacterOperator = length == 0 && isCharacterOperator(currentCharacter);
-        final boolean hasNextDigitCharacter = index < text.length() - 1 && Character.isDigit(text.charAt(index + 1));
-        return isFirstCharacterOperator && hasNextDigitCharacter;
+        if (length == 0) {
+            final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(currentPosition));
+            final boolean hasNextDigitCharacter = currentPosition < text.length() - 1 && Character.isDigit(text.charAt(currentPosition + 1));
+            return isFirstCharacterOperator && hasNextDigitCharacter;
+        }
+        return false;
     }
 
     private static boolean isCharacterOperator(final char currentCharacter) {
