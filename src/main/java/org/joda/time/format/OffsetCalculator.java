@@ -4,7 +4,6 @@ final class OffsetCalculator {
     private final CharSequence text;
     private final boolean isSigned;
     private int currentPosition;
-    private int length;
     private boolean negative;
     private int limit;
     private int value;
@@ -15,7 +14,6 @@ final class OffsetCalculator {
                      final int startingPosition) {
         this.text = text;
         this.currentPosition = startingPosition;
-        length = 0;
         negative = false;
         this.isSigned = isSigned;
         limit = Math.min(maximumDigitsToParse, text.length() - startingPosition);
@@ -30,40 +28,41 @@ final class OffsetCalculator {
     }
 
     void calculate() {
-        calculateLength();
-        updatePositionAndValue();
+        updatePositionAndValue(calculateLength());
     }
 
-    private void calculateLength() {
-        while (length < limit && shouldContinue()) {
-            updateBasedOnSign();
+    private int calculateLength() {
+        int length = 0;
+        while (length < limit && shouldContinue(length)) {
+            updateBasedOnSign(length);
             length = length + 1;
         }
+        return length;
     }
 
-    private boolean shouldContinue() {
-        final boolean hasSign = isPrefixedWithPlusOrMinus() && isSigned;
+    private boolean shouldContinue(int length) {
+        final boolean hasSign = isPrefixedWithPlusOrMinus(length) && isSigned;
         return Character.isDigit(text.charAt(currentPosition + length)) || hasSign;
     }
 
-    private boolean isPrefixedWithPlusOrMinus() {
+    private boolean isPrefixedWithPlusOrMinus(int length) {
         final int index = currentPosition + length;
         final char currentCharacter = text.charAt(index);
         final boolean isFirstCharacterOperator = length == 0 && isCharacterOperator(currentCharacter);
         final boolean hasNextDigitCharacter = index < text.length() - 1 && Character.isDigit(text.charAt(index + 1));
-        return isFirstCharacterOperator && isBeforeBoundary() && hasNextDigitCharacter;
+        return isFirstCharacterOperator && isBeforeBoundary(length) && hasNextDigitCharacter;
     }
 
     private static boolean isCharacterOperator(final char currentCharacter) {
         return currentCharacter == '-' || currentCharacter == '+';
     }
 
-    private boolean isBeforeBoundary() {
+    private boolean isBeforeBoundary(int length) {
         return length + 1 <= limit;
     }
 
-    private void updateBasedOnSign() {
-        if (isPrefixedWithPlusOrMinus()) {
+    private void updateBasedOnSign(int length) {
+        if (isPrefixedWithPlusOrMinus(length)) {
             negative = text.charAt(currentPosition + length) == '-';
             length = negative ? length + 1 : length;
             currentPosition = negative ? currentPosition : currentPosition + 1;
@@ -72,17 +71,17 @@ final class OffsetCalculator {
         }
     }
 
-    private void updatePositionAndValue() {
+    private void updatePositionAndValue(int length) {
         if (length == 0) {
             currentPosition = ~currentPosition;
         } else if (length >= 9) {
-            useDefaultParser();
+            useDefaultParser(length);
         } else {
-            useFastParser();
+            useFastParser(length);
         }
     }
 
-    private void useDefaultParser() {
+    private void useDefaultParser(int length) {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
         final String toParse = text.subSequence(currentPosition, currentPosition + length).toString();
@@ -90,7 +89,7 @@ final class OffsetCalculator {
         currentPosition += length;
     }
 
-    private void useFastParser() {
+    private void useFastParser(int length) {
         int i = negative ? currentPosition + 1 : currentPosition;
 
         final int index = i++;
