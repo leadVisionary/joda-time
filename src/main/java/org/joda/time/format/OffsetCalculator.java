@@ -33,7 +33,7 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = 0;
-        while (length < limit && (Character.isDigit(text.charAt(currentPosition + length)) || isPrefixedWithPlusOrMinus(length) && isSigned)) {
+        while (length < limit && isBeforeBoundary(length) && (Character.isDigit(text.charAt(currentPosition + length)) || isPrefixedWithPlusOrMinus(length) && isSigned)) {
             if (isPrefixedWithPlusOrMinus(length)) {
                 negative = text.charAt(currentPosition + length) == '-';
                 currentPosition = negative ? currentPosition : currentPosition + 1;
@@ -50,7 +50,7 @@ final class OffsetCalculator {
         final char currentCharacter = text.charAt(index);
         final boolean isFirstCharacterOperator = length == 0 && isCharacterOperator(currentCharacter);
         final boolean hasNextDigitCharacter = index < text.length() - 1 && Character.isDigit(text.charAt(index + 1));
-        return isFirstCharacterOperator && isBeforeBoundary(length) && hasNextDigitCharacter;
+        return isFirstCharacterOperator && hasNextDigitCharacter;
     }
 
     private static boolean isCharacterOperator(final char currentCharacter) {
