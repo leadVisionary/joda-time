@@ -2,11 +2,11 @@ package org.joda.time.format;
 
 final class OffsetCalculator {
     private final CharSequence text;
-    private final boolean isSigned;
     private int currentPosition;
     private boolean negative;
     private int limit;
     private int value;
+    private boolean startsWithSign;
 
     OffsetCalculator(final CharSequence text,
                      final int maximumDigitsToParse,
@@ -15,9 +15,9 @@ final class OffsetCalculator {
         this.text = text;
         this.currentPosition = startingPosition;
         negative = false;
-        this.isSigned = isSigned;
         limit = Math.min(maximumDigitsToParse, text.length() - startingPosition);
-        if (limit >= 1 && isSigned && isPrefixedWithPlusOrMinus()) {
+        startsWithSign = limit >= 1 && isSigned && isPrefixedWithPlusOrMinus();
+        if (startsWithSign) {
             negative = text.charAt(currentPosition) == '-';
             currentPosition = negative ? currentPosition : currentPosition + 1;
             // Expand the limit to disregard the sign character.
@@ -41,7 +41,7 @@ final class OffsetCalculator {
         int length = 0;
         while (length < limit &&
                 length + 1 <= limit &&
-                (Character.isDigit(text.charAt(currentPosition + length)) || length == 0 && isPrefixedWithPlusOrMinus() && isSigned)) {
+                (Character.isDigit(text.charAt(currentPosition + length)) || length == 0 && startsWithSign)) {
             length = length + 1;
         }
         return length;
