@@ -25,6 +25,16 @@ final class OffsetCalculator {
         }
     }
 
+    private boolean isPrefixedWithPlusOrMinus() {
+        final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(currentPosition));
+        final boolean hasNextDigitCharacter = currentPosition < text.length() - 1 && Character.isDigit(text.charAt(currentPosition + 1));
+        return isFirstCharacterOperator && hasNextDigitCharacter;
+    }
+
+    private static boolean isCharacterOperator(final char currentCharacter) {
+        return currentCharacter == '-' || currentCharacter == '+';
+    }
+
     int getCurrentPosition() {
         return currentPosition;
     }
@@ -45,16 +55,6 @@ final class OffsetCalculator {
             length = length + 1;
         }
         return length;
-    }
-
-    private boolean isPrefixedWithPlusOrMinus() {
-        final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(currentPosition));
-        final boolean hasNextDigitCharacter = currentPosition < text.length() - 1 && Character.isDigit(text.charAt(currentPosition + 1));
-        return isFirstCharacterOperator && hasNextDigitCharacter;
-    }
-
-    private static boolean isCharacterOperator(final char currentCharacter) {
-        return currentCharacter == '-' || currentCharacter == '+';
     }
 
     private void updatePositionAndValue(int length) {
