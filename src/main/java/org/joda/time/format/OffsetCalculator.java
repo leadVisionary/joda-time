@@ -33,15 +33,15 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = 0;
+        if (limit >= 1 && isSigned && isPrefixedWithPlusOrMinus()) {
+            negative = text.charAt(currentPosition + length) == '-';
+            currentPosition = negative ? currentPosition : currentPosition + 1;
+            // Expand the limit to disregard the sign character.
+            limit = Math.min(limit + 1, text.length() - currentPosition);
+        }
         while (length < limit &&
                 length + 1 <= limit &&
                 (Character.isDigit(text.charAt(currentPosition + length)) || length == 0 && isPrefixedWithPlusOrMinus() && isSigned)) {
-            if (length == 0 && isPrefixedWithPlusOrMinus()) {
-                negative = text.charAt(currentPosition + length) == '-';
-                currentPosition = negative ? currentPosition : currentPosition + 1;
-                // Expand the limit to disregard the sign character.
-                limit = Math.min(limit + 1, text.length() - currentPosition);
-            }
             length = length + 1;
         }
         return length;
