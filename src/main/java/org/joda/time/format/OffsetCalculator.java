@@ -2,32 +2,30 @@ package org.joda.time.format;
 
 final class OffsetCalculator {
     private final CharSequence text;
+    private final boolean startsWithSign;
+    private final boolean negative;
+    private final int limit;
+
     private int currentPosition;
-    private boolean negative;
-    private int limit;
     private int value;
-    private boolean startsWithSign;
+
 
     OffsetCalculator(final CharSequence text,
                      final int maximumDigitsToParse,
                      final boolean isSigned,
                      final int startingPosition) {
         this.text = text;
-        this.currentPosition = startingPosition;
-        negative = false;
-        limit = Math.min(maximumDigitsToParse, text.length() - startingPosition);
-        startsWithSign = limit >= 1 && isSigned && isPrefixedWithPlusOrMinus();
-        if (startsWithSign) {
-            negative = text.charAt(currentPosition) == '-';
-            currentPosition = negative ? currentPosition : currentPosition + 1;
-            // Expand the limit to disregard the sign character.
-            limit = Math.min(limit + 1, text.length() - currentPosition);
-        }
+        final int min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
+        startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus(text, startingPosition);
+        negative = startsWithSign && text.charAt(startingPosition) == '-';
+        currentPosition = startsWithSign ? (negative ?  startingPosition : startingPosition + 1) : startingPosition;
+        // Expand the limit to disregard the sign character.
+        limit = startsWithSign ? Math.min(min + 1, text.length() - currentPosition) : min;
     }
 
-    private boolean isPrefixedWithPlusOrMinus() {
-        final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(currentPosition));
-        final boolean hasNextDigitCharacter = currentPosition < text.length() - 1 && Character.isDigit(text.charAt(currentPosition + 1));
+    private static boolean isPrefixedWithPlusOrMinus(final CharSequence text, final int startingPosition) {
+        final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(startingPosition));
+        final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(text.charAt(startingPosition + 1));
         return isFirstCharacterOperator && hasNextDigitCharacter;
     }
 
