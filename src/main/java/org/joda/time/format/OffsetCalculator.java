@@ -17,6 +17,12 @@ final class OffsetCalculator {
         negative = false;
         this.isSigned = isSigned;
         limit = Math.min(maximumDigitsToParse, text.length() - startingPosition);
+        if (limit >= 1 && isSigned && isPrefixedWithPlusOrMinus()) {
+            negative = text.charAt(currentPosition) == '-';
+            currentPosition = negative ? currentPosition : currentPosition + 1;
+            // Expand the limit to disregard the sign character.
+            limit = Math.min(limit + 1, text.length() - currentPosition);
+        }
     }
 
     int getCurrentPosition() {
@@ -33,12 +39,6 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = 0;
-        if (limit >= 1 && isSigned && isPrefixedWithPlusOrMinus()) {
-            negative = text.charAt(currentPosition + length) == '-';
-            currentPosition = negative ? currentPosition : currentPosition + 1;
-            // Expand the limit to disregard the sign character.
-            limit = Math.min(limit + 1, text.length() - currentPosition);
-        }
         while (length < limit &&
                 length + 1 <= limit &&
                 (Character.isDigit(text.charAt(currentPosition + length)) || length == 0 && isPrefixedWithPlusOrMinus() && isSigned)) {
