@@ -1,7 +1,6 @@
 package org.joda.time.format;
 
 import org.joda.time.DateTimeFieldType;
-import org.joda.time.format.DateTimeParserBucket;
 
 final class FastNumberParser {
     private final DateTimeFieldType iFieldType;
