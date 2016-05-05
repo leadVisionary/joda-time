@@ -23,29 +23,25 @@ final class FastNumberParser {
         boolean negative = false;
         int length = 0;
         while (length < limit) {
-            char c = text.charAt(position + length);
-            final boolean isFirstCharacterOperator = length == 0 && (c == '-' || c == '+');
-            if (isFirstCharacterOperator && iSigned) {
+            final int index = position + length;
+            char c = text.charAt(index);
+            final boolean isPlusOrMinus = c == '-' || c == '+';
+            final boolean isFirstCharacterOperator = length == 0 && isPlusOrMinus;
+            final boolean b = !isPastBoundary(limit, length) && !isNotADigit(text.charAt(index + 1));
+            final boolean b1 = isFirstCharacterOperator && iSigned && b;
+            if (b1) {
                 negative = c == '-';
 
-                if (isPastBoundaryOrNotDigit(text, position, limit, length)) {
-                    break;
-                }
-
-                if (negative) {
-                    length++;
-                } else {
-                    // Skip the '+' for parseInt to succeed.
-                    position++;
-                }
+                length = (negative) ? length + 1 : length;
+                position = (negative) ? position : position + 1;
                 // Expand the limit to disregard the sign character.
                 limit = Math.min(limit + 1, text.length() - position);
-                continue;
+            } else {
+                if (isNotADigit(c)) {
+                    break;
+                }
+                length++;
             }
-            if (isNotADigit(c)) {
-                break;
-            }
-            length++;
         }
 
         if (length == 0) {
@@ -81,14 +77,8 @@ final class FastNumberParser {
         return position;
     }
 
-    private static boolean isPastBoundaryOrNotDigit(final CharSequence text, final int position, final int limit, final int length) {
-        final boolean isPastBoundary = length + 1 >= limit;
-        if (isPastBoundary) {
-            return true;
-        }
-        final char nextCharacter = text.charAt(position + length + 1);
-        final boolean isNotDigit = isNotADigit(nextCharacter);
-        return isNotDigit;
+    private static boolean isPastBoundary(final int limit, final int length) {
+        return length + 1 >= limit;
     }
 
     private static boolean isNotADigit(final char c) {
