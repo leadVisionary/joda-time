@@ -1301,7 +1301,7 @@ public class DateTimeFormatterBuilder {
         }
 
         public int parseInto(DateTimeParserBucket bucket, CharSequence text, int position) {
-            final OffsetCalculator calculator = new OffsetCalculator(text, iMaxParsedDigits, iSigned, position);
+            final OffsetCalculator calculator = new OffsetCalculator(new OffsetCalculator.NumericSequence(text, iMaxParsedDigits, iSigned, position));
             calculator.calculate();
 
             bucket.saveField(iFieldType, calculator.getValue());
