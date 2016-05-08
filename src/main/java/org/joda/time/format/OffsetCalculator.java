@@ -22,7 +22,7 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = sequence.isStartsWithSign() ? 1 : 0;
-        while (length + 1 <= limit && Character.isDigit(sequence.charAt(sequence.getCurrentPosition() + length))) {
+        while (length + 1 <= limit && sequence.isDigitAt(length)) {
             length = length + 1;
         }
         return length;
@@ -107,6 +107,10 @@ final class OffsetCalculator {
 
         private static boolean isCharacterOperator(final char currentCharacter) {
             return currentCharacter == '-' || currentCharacter == '+';
+        }
+
+        boolean isDigitAt(final int index) {
+            return Character.isDigit(charAt(getCurrentPosition() + index));
         }
 
         String getPart(final int length) {
