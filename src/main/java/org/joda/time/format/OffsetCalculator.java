@@ -57,7 +57,6 @@ final class OffsetCalculator {
     static class NumericSequence {
         private final CharSequence text;
         private final int min;
-        private final boolean isSigned;
         private final int startingPosition;
         private final boolean startsWithSign;
         private final boolean negative;
@@ -67,7 +66,6 @@ final class OffsetCalculator {
 
         NumericSequence(CharSequence text, int maximumDigitsToParse, boolean isSigned, int startingPosition) {
             this.text = text;
-            this.isSigned = isSigned;
             this.startingPosition = startingPosition;
             min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
             startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus();
@@ -84,11 +82,11 @@ final class OffsetCalculator {
         int getCurrentPosition() { return currentPosition; }
         void setCurrentPosition(final int position) { currentPosition = position; }
 
-        int getIndexOfFirstDigit() { return isNegative() ? getCurrentPosition() + 1 : getCurrentPosition(); }
+        int getIndexOfFirstDigit() { return isNegative()  ? getCurrentPosition() + 1 : getCurrentPosition(); }
 
         boolean isPrefixedWithPlusOrMinus() {
-            final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(startingPosition));
-            final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(text.charAt(startingPosition + 1));
+            final boolean isFirstCharacterOperator = isCharacterOperator(charAt(startingPosition));
+            final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(charAt(startingPosition + 1));
             return isFirstCharacterOperator && hasNextDigitCharacter;
         }
 
@@ -114,11 +112,9 @@ final class OffsetCalculator {
             return text.charAt(index);
         }
 
-        int getLimit() { return limit; }
-
         private int getLength() {
             int length = isStartsWithSign() ? 1 : 0;
-            while (length + 1 <= getLimit() && isDigitAt(length)) {
+            while (length + 1 <=  limit && isDigitAt(length)) {
                 length = length + 1;
             }
             return length;
