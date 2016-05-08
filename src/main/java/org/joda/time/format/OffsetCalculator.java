@@ -8,17 +8,9 @@ final class OffsetCalculator {
     }
 
     int calculate() {
-        return updatePositionAndValue(calculateLength());
+        return updatePositionAndValue(sequence.getLength());
     }
-
-    private int calculateLength() {
-        int length = sequence.isStartsWithSign() ? 1 : 0;
-        while (length + 1 <= sequence.getLimit() && sequence.isDigitAt(length)) {
-            length = length + 1;
-        }
-        return length;
-    }
-
+    
     private int updatePositionAndValue(int length) {
         if (length == 0) {
             sequence.setCurrentPosition(~sequence.getCurrentPosition());
@@ -60,7 +52,7 @@ final class OffsetCalculator {
         }
         return calculated;
     }
-    
+
     static class NumericSequence {
         private final CharSequence text;
         private final int min;
@@ -81,7 +73,7 @@ final class OffsetCalculator {
             negative = isStartsWithSign() && text.charAt(startingPosition) == '-';
             // Expand the limit to disregard the sign character.
             currentPosition = isStartsWithSign() ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
-            limit = isStartsWithSign() ? Math.min(getMin() + 1, getText().length() - getCurrentPosition()) : getMin();
+            limit = isStartsWithSign() ? Math.min(min + 1, text.length() - getCurrentPosition()) : min;
         }
 
         boolean isStartsWithSign() { return startsWithSign; }
@@ -121,18 +113,14 @@ final class OffsetCalculator {
             return text.charAt(index);
         }
 
-        public CharSequence getText() {
-            return text;
-        }
-
-        public int getMin() {
-            return min;
-        }
-
         int getLimit() { return limit; }
 
-        public boolean isSigned() {
-            return isSigned;
+        private int getLength() {
+            int length = isStartsWithSign() ? 1 : 0;
+            while (length + 1 <= getLimit() && isDigitAt(length)) {
+                length = length + 1;
+            }
+            return length;
         }
     }
 }
