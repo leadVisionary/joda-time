@@ -10,7 +10,7 @@ final class OffsetCalculator {
     int calculate() {
         return updatePositionAndValue(sequence.getLength());
     }
-    
+
     private int updatePositionAndValue(int length) {
         if (length == 0) {
             sequence.setCurrentPosition(~sequence.getCurrentPosition());
@@ -33,8 +33,9 @@ final class OffsetCalculator {
     private int useFastParser(int length) {
         int i = sequence.getIndexOfFirstDigit();
 
-        final int index = i++;
-        if (index < sequence.length()) {
+        final int index = i;
+        i = i + 1;
+        if (sequence.hasMoreThanOneDigit()) {
             sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
             return sequence.isNegative() ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
@@ -103,8 +104,8 @@ final class OffsetCalculator {
             return text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
         }
 
-        int length() { return  text.length(); }
-
+        boolean hasMoreThanOneDigit() { return getIndexOfFirstDigit() < text.length(); }
+        
         int getAsciiCharacterFor(final int index) {
             return charAt(index) - '0';
         }
