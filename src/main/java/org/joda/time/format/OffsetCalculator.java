@@ -3,19 +3,12 @@ package org.joda.time.format;
 final class OffsetCalculator {
     private final NumericSequence sequence;
 
-
-    private int value;
-
     OffsetCalculator(final NumericSequence numericSequence) {
         sequence = numericSequence;
     }
 
-    int getValue() {
-        return value;
-    }
-
-    void calculate() {
-        updatePositionAndValue(calculateLength());
+    int calculate() {
+        return updatePositionAndValue(calculateLength());
     }
 
     private int calculateLength() {
@@ -26,33 +19,35 @@ final class OffsetCalculator {
         return length;
     }
 
-    private void updatePositionAndValue(int length) {
+    private int updatePositionAndValue(int length) {
         if (length == 0) {
             sequence.setCurrentPosition(~sequence.getCurrentPosition());
+            return 0;
         } else if (length >= 9) {
-            useDefaultParser(length);
+            return useDefaultParser(length);
         } else {
-            useFastParser(length);
+            return useFastParser(length);
         }
     }
 
-    private void useDefaultParser(int length) {
+    private int useDefaultParser(int length) {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
         final String toParse = sequence.getPart(length);
-        value = Integer.parseInt(toParse);
         sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
+        return Integer.parseInt(toParse);
     }
 
-    private void useFastParser(int length) {
+    private int useFastParser(int length) {
         int i = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
 
         final int index = i++;
         if (index < sequence.length()) {
             sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
-            value = sequence.isNegative() ? -calculateValue(i, index) : calculateValue(i, index);
+            return sequence.isNegative() ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
             sequence.setCurrentPosition(~sequence.getCurrentPosition());
+            return 0;
         }
     }
 
