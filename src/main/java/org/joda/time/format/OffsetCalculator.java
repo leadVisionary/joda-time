@@ -2,14 +2,12 @@ package org.joda.time.format;
 
 final class OffsetCalculator {
     private final NumericSequence sequence;
-    private final int limit;
+
 
     private int value;
 
     OffsetCalculator(final NumericSequence numericSequence) {
         sequence = numericSequence;
-        // Expand the limit to disregard the sign character.
-        limit = numericSequence.isStartsWithSign() ? Math.min(numericSequence.getMin() + 1, numericSequence.getText().length() - sequence.getCurrentPosition()) : numericSequence.getMin();
     }
 
     int getValue() {
@@ -22,7 +20,7 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = sequence.isStartsWithSign() ? 1 : 0;
-        while (length + 1 <= limit && sequence.isDigitAt(length)) {
+        while (length + 1 <= sequence.getLimit() && sequence.isDigitAt(length)) {
             length = length + 1;
         }
         return length;
@@ -79,6 +77,7 @@ final class OffsetCalculator {
         private final int startingPosition;
         private final boolean startsWithSign;
         private final boolean negative;
+        private final int limit;
 
         private int currentPosition;
 
@@ -89,7 +88,9 @@ final class OffsetCalculator {
             min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
             startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus();
             negative = isStartsWithSign() && text.charAt(startingPosition) == '-';
+            // Expand the limit to disregard the sign character.
             currentPosition = isStartsWithSign() ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
+            limit = isStartsWithSign() ? Math.min(getMin() + 1, getText().length() - getCurrentPosition()) : getMin();
         }
 
         boolean isStartsWithSign() { return startsWithSign; }
@@ -130,6 +131,8 @@ final class OffsetCalculator {
         public int getMin() {
             return min;
         }
+
+        int getLimit() { return limit; }
 
         public boolean isSigned() {
             return isSigned;
