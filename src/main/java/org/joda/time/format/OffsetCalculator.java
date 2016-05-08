@@ -5,20 +5,15 @@ final class OffsetCalculator {
     private final NumericSequence sequence;
     private final int limit;
 
-    private int currentPosition;
+
     private int value;
 
 
     OffsetCalculator(NumericSequence numericSequence) {
         this.text = numericSequence.getText();
         sequence = numericSequence;
-        currentPosition = numericSequence.isStartsWithSign() ? (sequence.isNegative() ? numericSequence.getStartingPosition() : numericSequence.getStartingPosition() + 1) : numericSequence.getStartingPosition();
         // Expand the limit to disregard the sign character.
-        limit = numericSequence.isStartsWithSign() ? Math.min(numericSequence.getMin() + 1, numericSequence.getText().length() - currentPosition) : numericSequence.getMin();
-    }
-
-    int getCurrentPosition() {
-        return currentPosition;
+        limit = numericSequence.isStartsWithSign() ? Math.min(numericSequence.getMin() + 1, numericSequence.getText().length() - sequence.getCurrentPosition()) : numericSequence.getMin();
     }
 
     int getValue() {
@@ -31,7 +26,7 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = sequence.isStartsWithSign() ? 1 : 0;
-        while (length + 1 <= limit && Character.isDigit(text.charAt(currentPosition + length))) {
+        while (length + 1 <= limit && Character.isDigit(text.charAt(sequence.getCurrentPosition() + length))) {
             length = length + 1;
         }
         return length;
@@ -39,7 +34,7 @@ final class OffsetCalculator {
 
     private void updatePositionAndValue(int length) {
         if (length == 0) {
-            currentPosition = ~currentPosition;
+            sequence.setCurrentPosition(~sequence.getCurrentPosition());
         } else if (length >= 9) {
             useDefaultParser(length);
         } else {
@@ -50,20 +45,20 @@ final class OffsetCalculator {
     private void useDefaultParser(int length) {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
-        final String toParse = text.subSequence(currentPosition, currentPosition + length).toString();
+        final String toParse = text.subSequence(sequence.getCurrentPosition(), sequence.getCurrentPosition() + length).toString();
         value = Integer.parseInt(toParse);
-        currentPosition += length;
+        sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
     }
 
     private void useFastParser(int length) {
-        int i = sequence.isNegative() ? currentPosition + 1 : currentPosition;
+        int i = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
 
         final int index = i++;
         if (index < text.length()) {
-            currentPosition += length;
+            sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
             value = sequence.isNegative() ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
-            currentPosition = ~currentPosition;
+            sequence.setCurrentPosition(~sequence.getCurrentPosition());
         }
     }
 
@@ -71,7 +66,7 @@ final class OffsetCalculator {
         int startingIndex = i;
         int calculated = getAsciiCharacterFor(index);
 
-        while (startingIndex < currentPosition) {
+        while (startingIndex < sequence.getCurrentPosition()) {
             calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(startingIndex++);
         }
         return calculated;
@@ -89,6 +84,8 @@ final class OffsetCalculator {
         private final boolean startsWithSign;
         private final boolean negative;
 
+        private int currentPosition;
+
         NumericSequence(CharSequence text, int maximumDigitsToParse, boolean isSigned, int startingPosition) {
             this.text = text;
             this.isSigned = isSigned;
@@ -96,11 +93,15 @@ final class OffsetCalculator {
             min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
             startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus();
             negative = isStartsWithSign() && text.charAt(startingPosition) == '-';
+            currentPosition = isStartsWithSign() ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
         }
 
         boolean isStartsWithSign() { return startsWithSign; }
 
         boolean isNegative() { return negative; }
+
+        int getCurrentPosition() { return currentPosition; }
+        void setCurrentPosition(final int position) { currentPosition = position; }
 
         boolean isPrefixedWithPlusOrMinus() {
             final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(startingPosition));
