@@ -1,16 +1,12 @@
 package org.joda.time.format;
 
 final class OffsetCalculator {
-    private final CharSequence text;
     private final NumericSequence sequence;
     private final int limit;
 
-
     private int value;
 
-
-    OffsetCalculator(NumericSequence numericSequence) {
-        this.text = numericSequence.getText();
+    OffsetCalculator(final NumericSequence numericSequence) {
         sequence = numericSequence;
         // Expand the limit to disregard the sign character.
         limit = numericSequence.isStartsWithSign() ? Math.min(numericSequence.getMin() + 1, numericSequence.getText().length() - sequence.getCurrentPosition()) : numericSequence.getMin();
@@ -26,7 +22,7 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = sequence.isStartsWithSign() ? 1 : 0;
-        while (length + 1 <= limit && Character.isDigit(text.charAt(sequence.getCurrentPosition() + length))) {
+        while (length + 1 <= limit && Character.isDigit(sequence.charAt(sequence.getCurrentPosition() + length))) {
             length = length + 1;
         }
         return length;
@@ -45,7 +41,7 @@ final class OffsetCalculator {
     private void useDefaultParser(int length) {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
-        final String toParse = text.subSequence(sequence.getCurrentPosition(), sequence.getCurrentPosition() + length).toString();
+        final String toParse = sequence.getPart(length);
         value = Integer.parseInt(toParse);
         sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
     }
@@ -54,7 +50,7 @@ final class OffsetCalculator {
         int i = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
 
         final int index = i++;
-        if (index < text.length()) {
+        if (index < sequence.length()) {
             sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
             value = sequence.isNegative() ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
@@ -73,7 +69,7 @@ final class OffsetCalculator {
     }
 
     private int getAsciiCharacterFor(final int index) {
-        return text.charAt(index) - '0';
+        return sequence.charAt(index) - '0';
     }
 
     static class NumericSequence {
@@ -113,6 +109,16 @@ final class OffsetCalculator {
             return currentCharacter == '-' || currentCharacter == '+';
         }
 
+        String getPart(final int length) {
+            return text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
+        }
+
+        int length() { return  text.length(); }
+
+        char charAt(int index) {
+            return text.charAt(index);
+        }
+
         public CharSequence getText() {
             return text;
         }
@@ -123,10 +129,6 @@ final class OffsetCalculator {
 
         public boolean isSigned() {
             return isSigned;
-        }
-
-        public int getStartingPosition() {
-            return startingPosition;
         }
     }
 }
