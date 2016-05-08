@@ -47,9 +47,7 @@ final class OffsetCalculator {
 
     private int calculateLength() {
         int length = startsWithSign ? 1 : 0;
-        while (length < limit &&
-                length + 1 <= limit &&
-                (Character.isDigit(text.charAt(currentPosition + length)))) {
+        while (length + 1 <= limit && Character.isDigit(text.charAt(currentPosition + length))) {
             length = length + 1;
         }
         return length;
