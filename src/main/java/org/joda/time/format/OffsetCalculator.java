@@ -3,7 +3,6 @@ package org.joda.time.format;
 final class OffsetCalculator {
     private final CharSequence text;
     private final NumericSequence sequence;
-    private final boolean negative;
     private final int limit;
 
     private int currentPosition;
@@ -13,8 +12,7 @@ final class OffsetCalculator {
     OffsetCalculator(NumericSequence numericSequence) {
         this.text = numericSequence.getText();
         sequence = numericSequence;
-        negative = numericSequence.isStartsWithSign() && numericSequence.getText().charAt(numericSequence.getStartingPosition()) == '-';
-        currentPosition = numericSequence.isStartsWithSign() ? (negative ? numericSequence.getStartingPosition() : numericSequence.getStartingPosition() + 1) : numericSequence.getStartingPosition();
+        currentPosition = numericSequence.isStartsWithSign() ? (sequence.isNegative() ? numericSequence.getStartingPosition() : numericSequence.getStartingPosition() + 1) : numericSequence.getStartingPosition();
         // Expand the limit to disregard the sign character.
         limit = numericSequence.isStartsWithSign() ? Math.min(numericSequence.getMin() + 1, numericSequence.getText().length() - currentPosition) : numericSequence.getMin();
     }
@@ -58,12 +56,12 @@ final class OffsetCalculator {
     }
 
     private void useFastParser(int length) {
-        int i = negative ? currentPosition + 1 : currentPosition;
+        int i = sequence.isNegative() ? currentPosition + 1 : currentPosition;
 
         final int index = i++;
         if (index < text.length()) {
             currentPosition += length;
-            value = negative ? -calculateValue(i, index) : calculateValue(i, index);
+            value = sequence.isNegative() ? -calculateValue(i, index) : calculateValue(i, index);
         } else {
             currentPosition = ~currentPosition;
         }
@@ -89,6 +87,7 @@ final class OffsetCalculator {
         private final boolean isSigned;
         private final int startingPosition;
         private final boolean startsWithSign;
+        private final boolean negative;
 
         NumericSequence(CharSequence text, int maximumDigitsToParse, boolean isSigned, int startingPosition) {
             this.text = text;
@@ -96,9 +95,12 @@ final class OffsetCalculator {
             this.startingPosition = startingPosition;
             min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
             startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus();
+            negative = isStartsWithSign() && text.charAt(startingPosition) == '-';
         }
 
         boolean isStartsWithSign() { return startsWithSign; }
+
+        boolean isNegative() { return negative; }
 
         boolean isPrefixedWithPlusOrMinus() {
             final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(startingPosition));
