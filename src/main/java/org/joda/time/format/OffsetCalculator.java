@@ -39,7 +39,7 @@ final class OffsetCalculator {
     }
 
     private int useFastParser(int length) {
-        int i = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
+        int i = sequence.getIndexOfFirstDigit();
 
         final int index = i++;
         if (index < sequence.length()) {
@@ -53,18 +53,14 @@ final class OffsetCalculator {
 
     private int calculateValue(final int i, final int index) {
         int startingIndex = i;
-        int calculated = getAsciiCharacterFor(index);
+        int calculated = sequence.getAsciiCharacterFor(index);
 
         while (startingIndex < sequence.getCurrentPosition()) {
-            calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(startingIndex++);
+            calculated = ((calculated << 3) + (calculated << 1)) + sequence.getAsciiCharacterFor(startingIndex++);
         }
         return calculated;
     }
-
-    private int getAsciiCharacterFor(final int index) {
-        return sequence.charAt(index) - '0';
-    }
-
+    
     static class NumericSequence {
         private final CharSequence text;
         private final int min;
@@ -95,6 +91,8 @@ final class OffsetCalculator {
         int getCurrentPosition() { return currentPosition; }
         void setCurrentPosition(final int position) { currentPosition = position; }
 
+        int getIndexOfFirstDigit() { return isNegative() ? getCurrentPosition() + 1 : getCurrentPosition(); }
+
         boolean isPrefixedWithPlusOrMinus() {
             final boolean isFirstCharacterOperator = isCharacterOperator(text.charAt(startingPosition));
             final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(text.charAt(startingPosition + 1));
@@ -114,6 +112,10 @@ final class OffsetCalculator {
         }
 
         int length() { return  text.length(); }
+
+        int getAsciiCharacterFor(final int index) {
+            return charAt(index) - '0';
+        }
 
         char charAt(int index) {
             return text.charAt(index);
