@@ -1,25 +1,21 @@
 package org.joda.time.format;
 
 final class OffsetCalculator {
-    private final NumericSequence sequence;
+    private OffsetCalculator() {}
 
-    OffsetCalculator(final NumericSequence numericSequence) {
-        sequence = numericSequence;
-    }
-
-    int calculate() {
+    static int calculate(final NumericSequence sequence) {
         final int length = sequence.getLength();
         if (length == 0 || !sequence.hasMoreThanOneDigit()) {
             sequence.setCurrentPosition(~sequence.getCurrentPosition());
             return 0;
         } else if (length >= 9) {
-            return defaultCalculate(length);
+            return defaultCalculate(sequence, length);
         } else {
-            return fastCalculate(length);
+            return fastCalculate(sequence, length);
         }
     }
 
-    private int defaultCalculate(int length) {
+    private static int defaultCalculate(final NumericSequence sequence, int length) {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
         final String toParse = sequence.getPart(length);
@@ -27,7 +23,7 @@ final class OffsetCalculator {
         return Integer.parseInt(toParse);
     }
 
-    private int fastCalculate(int length) {
+    private static int fastCalculate(final NumericSequence sequence, int length) {
         int startingIndex = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
         int calculated = sequence.getAsciiCharacterFor(startingIndex);
         sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
@@ -36,5 +32,4 @@ final class OffsetCalculator {
         }
         return sequence.isNegative() ? -calculated : calculated;
     }
-
 }
