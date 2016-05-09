@@ -34,6 +34,7 @@ import org.joda.time.MutableDateTime.Property;
 import org.joda.time.ReadablePartial;
 import org.joda.time.field.MillisDurationField;
 import org.joda.time.field.PreciseDateTimeField;
+import org.joda.time.format.parsing.NumericSequence;
 
 /**
  * Factory that creates complex instances of DateTimeFormatter via method calls.

@@ -1,6 +1,6 @@
-package org.joda.time.format;
+package org.joda.time.format.parsing;
 
-final class NumericSequence {
+public final class NumericSequence {
     private final CharSequence text;
     private final boolean startsWithSign;
     private final boolean negative;
@@ -8,7 +8,7 @@ final class NumericSequence {
 
     private int currentPosition;
 
-    NumericSequence(final CharSequence text, final int maximumDigitsToParse, final boolean isSigned, final int startingPosition) {
+    public NumericSequence(final CharSequence text, final int maximumDigitsToParse, final boolean isSigned, final int startingPosition) {
         this.text = text;
         final int min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
         startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus(startingPosition);
@@ -18,15 +18,15 @@ final class NumericSequence {
         limit = startsWithSign ? Math.min(min + 1, text.length() - getCurrentPosition()) : min;
     }
 
-    boolean isNegative() {
+    public boolean isNegative() {
         return negative;
     }
 
-    int getCurrentPosition() {
+    public int getCurrentPosition() {
         return currentPosition;
     }
 
-    void setCurrentPosition(final int position) {
+    public void setCurrentPosition(final int position) {
         currentPosition = position;
     }
 
@@ -44,15 +44,15 @@ final class NumericSequence {
         return Character.isDigit(charAt(getCurrentPosition() + index));
     }
 
-    String getPart(final int length) {
+    public String getPart(final int length) {
         return text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
     }
 
-    boolean hasMoreThanOneDigit() {
+    public boolean hasMoreThanOneDigit() {
         return (isNegative() ? getCurrentPosition() + 1 : getCurrentPosition()) < text.length();
     }
 
-    int getAsciiCharacterFor(final int index) {
+    public int getAsciiCharacterFor(final int index) {
         return charAt(index) - '0';
     }
 
@@ -60,7 +60,7 @@ final class NumericSequence {
         return text.charAt(index);
     }
 
-    int getLength() {
+    public int getLength() {
         int length = startsWithSign ? 1 : 0;
         while (length + 1 <= limit && isDigitAt(length)) {
             length = length + 1;
