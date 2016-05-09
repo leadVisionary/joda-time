@@ -60,11 +60,15 @@ public final class NumericSequence {
         return currentPosition;
     }
 
-    public void setCurrentPosition(final int position) {
-        currentPosition = position;
+    public void addLengthToPosition() {
+        currentPosition = getCurrentPosition() + length;
     }
 
-    public String getPart(final int length) {
+    public void invertPosition() {
+        currentPosition = ~getCurrentPosition();
+    }
+
+    public String getNumberAsString() {
         return text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
     }
 

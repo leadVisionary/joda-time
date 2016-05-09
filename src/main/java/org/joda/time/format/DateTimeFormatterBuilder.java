@@ -1310,27 +1310,27 @@ public class DateTimeFormatterBuilder {
         static int calculate(final NumericSequence sequence) {
             final int length = sequence.getLength();
             if (length == 0 || !sequence.hasMoreThanOneDigit()) {
-                sequence.setCurrentPosition(~sequence.getCurrentPosition());
+                sequence.invertPosition();
                 return 0;
             } else if (length >= 9) {
-                return defaultCalculate(sequence, length);
+                return defaultCalculate(sequence);
             } else {
-                return fastCalculate(sequence, length);
+                return fastCalculate(sequence);
             }
         }
 
-        private static int defaultCalculate(final NumericSequence sequence, int length) {
+        private static int defaultCalculate(final NumericSequence sequence) {
             // Since value may exceed integer limits, use stock parser
             // which checks for this.
-            final String toParse = sequence.getPart(length);
-            sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
+            final String toParse = sequence.getNumberAsString();
+            sequence.addLengthToPosition();
             return Integer.parseInt(toParse);
         }
 
-        private static int fastCalculate(final NumericSequence sequence, int length) {
+        private static int fastCalculate(final NumericSequence sequence) {
             int startingIndex = sequence.getIndexOfFirstDigit();
             int calculated = sequence.getAsciiCharacterFor(startingIndex);
-            sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
+            sequence.addLengthToPosition();
             for (int i = startingIndex + 1; i < sequence.getCurrentPosition(); i++) {
                 calculated = ((calculated << 3) + (calculated << 1)) + sequence.getAsciiCharacterFor(i);
             }
