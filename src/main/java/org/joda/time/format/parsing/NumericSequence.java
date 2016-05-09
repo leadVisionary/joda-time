@@ -5,6 +5,7 @@ public final class NumericSequence {
     private final boolean startsWithSign;
     private final boolean negative;
     private final int limit;
+    private final int length;
 
     private int currentPosition;
 
@@ -16,6 +17,15 @@ public final class NumericSequence {
         // Expand the limit to disregard the sign character.
         currentPosition = startsWithSign ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
         limit = startsWithSign ? Math.min(min + 1, text.length() - getCurrentPosition()) : min;
+        length = calculateLength();
+    }
+
+    private int calculateLength() {
+        int length = startsWithSign ? 1 : 0;
+        while (length + 1 <= limit && isDigitAt(length)) {
+            length = length + 1;
+        }
+        return length;
     }
 
     public int getIndexOfFirstDigit() {
@@ -64,11 +74,5 @@ public final class NumericSequence {
         return text.charAt(index);
     }
 
-    public int getLength() {
-        int length = startsWithSign ? 1 : 0;
-        while (length + 1 <= limit && isDigitAt(length)) {
-            length = length + 1;
-        }
-        return length;
-    }
+    public int getLength() { return length; }
 }
