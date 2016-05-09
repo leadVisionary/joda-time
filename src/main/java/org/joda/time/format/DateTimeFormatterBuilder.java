@@ -1328,7 +1328,7 @@ public class DateTimeFormatterBuilder {
         }
 
         private static int fastCalculate(final NumericSequence sequence, int length) {
-            int startingIndex = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
+            int startingIndex = sequence.getIndexOfFirstDigit();
             int calculated = sequence.getAsciiCharacterFor(startingIndex);
             sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
             for (int i = startingIndex + 1; i < sequence.getCurrentPosition(); i++) {

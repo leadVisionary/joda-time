@@ -18,6 +18,10 @@ public final class NumericSequence {
         limit = startsWithSign ? Math.min(min + 1, text.length() - getCurrentPosition()) : min;
     }
 
+    public int getIndexOfFirstDigit() {
+        return isNegative() ? getCurrentPosition() + 1 : getCurrentPosition();
+    }
+
     public boolean isNegative() {
         return negative;
     }
