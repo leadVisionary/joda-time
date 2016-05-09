@@ -1310,13 +1310,17 @@ public class DateTimeFormatterBuilder {
         static int calculate(final NumericSequence sequence) {
             final int length = sequence.getLength();
             if (length == 0 || !sequence.hasMoreThanOneDigit()) {
-                sequence.invertPosition();
-                return 0;
+                return handleFailure(sequence);
             } else if (length >= 9) {
                 return defaultCalculate(sequence);
             } else {
                 return fastCalculate(sequence);
             }
+        }
+
+        private static int handleFailure(final NumericSequence sequence) {
+            sequence.invertPosition();
+            return 0;
         }
 
         private static int defaultCalculate(final NumericSequence sequence) {
