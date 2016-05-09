@@ -22,7 +22,7 @@ public final class NumericSequence {
 
     private int calculateLength() {
         int length = startsWithSign ? 1 : 0;
-        while (length + 1 <= limit && isDigitAt(length)) {
+        while (length + 1 <= limit && isDigitAt(getCurrentPosition() + length)) {
             length = length + 1;
         }
         return length;
@@ -46,7 +46,7 @@ public final class NumericSequence {
 
     private boolean isPrefixedWithPlusOrMinus(final int startingPosition) {
         final boolean isFirstCharacterOperator = isCharacterOperator(charAt(startingPosition));
-        final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(charAt(startingPosition + 1));
+        final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && isDigitAt(startingPosition + 1);
         return isFirstCharacterOperator && hasNextDigitCharacter;
     }
 
@@ -55,7 +55,7 @@ public final class NumericSequence {
     }
 
     private boolean isDigitAt(final int index) {
-        return Character.isDigit(charAt(getCurrentPosition() + index));
+        return Character.isDigit(charAt(index));
     }
 
     public String getPart(final int length) {
