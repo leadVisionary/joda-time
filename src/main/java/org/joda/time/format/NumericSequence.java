@@ -2,8 +2,6 @@ package org.joda.time.format;
 
 final class NumericSequence {
     private final CharSequence text;
-    private final int min;
-    private final int startingPosition;
     private final boolean startsWithSign;
     private final boolean negative;
     private final int limit;
@@ -12,9 +10,8 @@ final class NumericSequence {
 
     NumericSequence(final CharSequence text, final int maximumDigitsToParse, final boolean isSigned, final int startingPosition) {
         this.text = text;
-        this.startingPosition = startingPosition;
-        min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
-        startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus();
+        final int min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
+        startsWithSign = min >= 1 && isSigned && isPrefixedWithPlusOrMinus(startingPosition);
         negative = startsWithSign && text.charAt(startingPosition) == '-';
         // Expand the limit to disregard the sign character.
         currentPosition = startsWithSign ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
@@ -33,7 +30,7 @@ final class NumericSequence {
         currentPosition = position;
     }
 
-    private boolean isPrefixedWithPlusOrMinus() {
+    private boolean isPrefixedWithPlusOrMinus(final int startingPosition) {
         final boolean isFirstCharacterOperator = isCharacterOperator(charAt(startingPosition));
         final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(charAt(startingPosition + 1));
         return isFirstCharacterOperator && hasNextDigitCharacter;
