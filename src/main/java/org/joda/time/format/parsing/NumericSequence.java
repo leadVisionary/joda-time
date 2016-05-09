@@ -20,6 +20,20 @@ public final class NumericSequence {
         length = calculateLength();
     }
 
+    private boolean isPrefixedWithPlusOrMinus(final int startingPosition) {
+        final boolean isFirstCharacterOperator = isCharacterOperator(charAt(startingPosition));
+        final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && isDigitAt(startingPosition + 1);
+        return isFirstCharacterOperator && hasNextDigitCharacter;
+    }
+
+    private static boolean isCharacterOperator(final char currentCharacter) {
+        return currentCharacter == '-' || currentCharacter == '+';
+    }
+
+    private boolean isDigitAt(final int index) {
+        return Character.isDigit(charAt(index));
+    }
+
     private int calculateLength() {
         int length = startsWithSign ? 1 : 0;
         while (length + 1 <= limit && isDigitAt(getCurrentPosition() + length)) {
@@ -42,20 +56,6 @@ public final class NumericSequence {
 
     public void setCurrentPosition(final int position) {
         currentPosition = position;
-    }
-
-    private boolean isPrefixedWithPlusOrMinus(final int startingPosition) {
-        final boolean isFirstCharacterOperator = isCharacterOperator(charAt(startingPosition));
-        final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && isDigitAt(startingPosition + 1);
-        return isFirstCharacterOperator && hasNextDigitCharacter;
-    }
-
-    private static boolean isCharacterOperator(final char currentCharacter) {
-        return currentCharacter == '-' || currentCharacter == '+';
-    }
-
-    private boolean isDigitAt(final int index) {
-        return Character.isDigit(charAt(index));
     }
 
     public String getPart(final int length) {
