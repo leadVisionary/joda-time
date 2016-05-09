@@ -13,13 +13,13 @@ final class OffsetCalculator {
             sequence.setCurrentPosition(~sequence.getCurrentPosition());
             return 0;
         } else if (length >= 9) {
-            return useDefaultParser(length);
+            return defaultCalculate(length);
         } else {
-            return useFastParser(length);
+            return fastCalculate(length);
         }
     }
 
-    private int useDefaultParser(int length) {
+    private int defaultCalculate(int length) {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
         final String toParse = sequence.getPart(length);
@@ -27,26 +27,14 @@ final class OffsetCalculator {
         return Integer.parseInt(toParse);
     }
 
-    private int useFastParser(int length) {
-        return fastCalculate(length);
-    }
-
     private int fastCalculate(int length) {
-        int i = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
-        final int index = i;
-        i = i + 1;
+        int startingIndex = sequence.isNegative() ? sequence.getCurrentPosition() + 1 : sequence.getCurrentPosition();
+        int calculated = sequence.getAsciiCharacterFor(startingIndex);
         sequence.setCurrentPosition(sequence.getCurrentPosition() + length);
-        return sequence.isNegative() ? -calculateValue(i, index) : calculateValue(i, index);
-    }
-
-    private int calculateValue(final int i, final int index) {
-        int startingIndex = i;
-        int calculated = sequence.getAsciiCharacterFor(index);
-
-        while (startingIndex < sequence.getCurrentPosition()) {
-            calculated = ((calculated << 3) + (calculated << 1)) + sequence.getAsciiCharacterFor(startingIndex++);
+        for (int i = startingIndex + 1; i < sequence.getCurrentPosition(); i++) {
+            calculated = ((calculated << 3) + (calculated << 1)) + sequence.getAsciiCharacterFor(i);
         }
-        return calculated;
+        return sequence.isNegative() ? -calculated : calculated;
     }
 
     static class NumericSequence {
@@ -77,7 +65,7 @@ final class OffsetCalculator {
         int getCurrentPosition() { return currentPosition; }
         void setCurrentPosition(final int position) { currentPosition = position; }
 
-        boolean isPrefixedWithPlusOrMinus() {
+        private boolean isPrefixedWithPlusOrMinus() {
             final boolean isFirstCharacterOperator = isCharacterOperator(charAt(startingPosition));
             final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(charAt(startingPosition + 1));
             return isFirstCharacterOperator && hasNextDigitCharacter;
