@@ -13,8 +13,8 @@ public final class NumericSequence {
         this.text = text;
         startsWithSign = isPrefixedWithPlusOrMinus(maximumDigitsToParse, isSigned, startingPosition);
         negative = startsWithSign && charAt(startingPosition) == '-';
+        currentPosition = startingPosition;
         // Expand the limit to disregard the sign character.
-        currentPosition = startsWithSign ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
         limit = Math.min(startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse, text.length() - getCurrentPosition());
         length = calculateLength();
     }
@@ -49,7 +49,7 @@ public final class NumericSequence {
     }
 
     public int getIndexOfFirstDigit() {
-        return isNegative() ? getCurrentPosition() + 1 : getCurrentPosition();
+        return startsWithSign ? getCurrentPosition() + 1 : getCurrentPosition();
     }
 
     public boolean isNegative() {
