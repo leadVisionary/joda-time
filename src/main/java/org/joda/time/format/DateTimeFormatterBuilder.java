@@ -1303,7 +1303,11 @@ public class DateTimeFormatterBuilder {
 
         public int parseInto(DateTimeParserBucket bucket, CharSequence text, int position) {
             final NumericSequence sequence = new NumericSequence(text, iMaxParsedDigits, iSigned, position);
-            bucket.saveField(iFieldType, calculate(sequence));
+            System.out.println("length:" + sequence.getLength());
+            System.out.println("currentPosition: " + sequence.getCurrentPosition());
+            final int calculated = calculate(sequence);
+            System.out.println("calculated: " + calculated);
+            bucket.saveField(iFieldType, calculated);
             return sequence.getCurrentPosition();
         }
 

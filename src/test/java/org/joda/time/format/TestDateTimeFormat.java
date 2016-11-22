@@ -1198,7 +1198,7 @@ public class TestDateTimeFormat extends TestCase {
     /**
      * https://github.com/JodaOrg/joda-time/issues/86
      */
-    public void test_fix_issues_86_correctly_parses_plus_in_front_of_year_for_MMyyydd() {
+    public void test_fix_issues_86_correctly_parses_plus_in_front_of_year_for_MMyyyydd() {
         // Given: an expected pattern like 01201309
         final String pattern = "MMyyyydd";
         // And: a date that includes + per the ISO8601 spec of allowing it for 5 digit years
