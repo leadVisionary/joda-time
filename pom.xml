@@ -302,6 +302,7 @@
         <configuration>
           <includes>
             <include>**/TestAllPackages.java</include>
+            <include>**/TestStudy.java</include>
           </includes>
         </configuration>
       </plugin>
