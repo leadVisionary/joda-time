@@ -1319,12 +1319,13 @@ public class DateTimeFormatterBuilder {
 
                     if (negative) {
                         length++;
+                        limit = Math.min(limit + 1, text.length() - position);
+
                     } else {
                         // Skip the '+' for parseInt to succeed.
                         position++;
                     }
                     // Expand the limit to disregard the sign character.
-                    limit = Math.min(limit + 1, text.length() - position);
                     continue;
                 }
                 if (c < '0' || c > '9') {
