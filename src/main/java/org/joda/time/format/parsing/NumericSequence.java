@@ -16,6 +16,7 @@ public final class NumericSequence {
         // Expand the limit to disregard the sign character.
         currentPosition = startsWithSign ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
         limit = Math.min(startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse, text.length() - getCurrentPosition());
+//        limit = Math.min(maximumDigitsToParse, text.length() - getCurrentPosition());
         length = calculateLength();
     }
 
