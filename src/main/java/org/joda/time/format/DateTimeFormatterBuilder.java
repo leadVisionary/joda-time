@@ -1334,8 +1334,11 @@ public class DateTimeFormatterBuilder {
         private static int fastCalculate(final NumericSequence sequence) {
             int startingIndex = sequence.getIndexOfFirstDigit();
             int calculated = sequence.getAsciiCharacterFor(startingIndex);
-            sequence.addLengthToPosition();
-            for (int i = startingIndex + 1; i < sequence.getCurrentPosition(); i++) {
+             sequence.addLengthToPosition();
+            int end =  sequence.getCurrentPosition(); // added slewis
+         //   if(sequence.isStartWithSign())
+         //       end--;
+            for (int i = startingIndex + 1; i < end; i++) {
                 calculated = ((calculated << 3) + (calculated << 1)) + sequence.getAsciiCharacterFor(i);
             }
             return sequence.isNegative() ? -calculated : calculated;

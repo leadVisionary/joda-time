@@ -41,10 +41,13 @@ public final class NumericSequence {
     }
 
     private int calculateLength() {
+        //int length = 0;
         int length = startsWithSign ? 1 : 0;
         while (length + 1 <= limit && isDigitAt(getCurrentPosition() + length)) {
             length = length + 1;
         }
+   //     if(startsWithSign)
+   //         length--;
         return length;
     }
 
@@ -61,8 +64,9 @@ public final class NumericSequence {
     }
 
     public void addLengthToPosition() {
+
         currentPosition = getCurrentPosition() + length;
-    }
+      }
 
     public void invertPosition() {
         currentPosition = ~getCurrentPosition();
@@ -81,4 +85,6 @@ public final class NumericSequence {
     }
 
     public int getLength() { return length; }
+
+    public boolean isStartWithSign() { return startsWithSign; } // added SLewis
 }
