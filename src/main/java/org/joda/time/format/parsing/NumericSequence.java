@@ -12,77 +12,55 @@ public final class NumericSequence {
     public NumericSequence(final CharSequence text, final int maximumDigitsToParse, final boolean isSigned, final int startingPosition) {
         this.text = text;
         startsWithSign = isPrefixedWithPlusOrMinus(maximumDigitsToParse, isSigned, startingPosition);
-        negative = startsWithSign && charAt(startingPosition) == '-';
-        // Expand the limit to disregard the sign character.
-        currentPosition = startsWithSign ? (isNegative() ? startingPosition : startingPosition + 1) : startingPosition;
-        limit = Math.min(startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse, text.length() - getCurrentPosition());
+        negative = startsWithSign && text.charAt(startingPosition) == '-';
+        currentPosition = determineCurrentPosition(startingPosition);
+        limit = findLastIndexOfStringToParse(text, maximumDigitsToParse);
         length = calculateLength();
     }
 
     private boolean isPrefixedWithPlusOrMinus(final int maximumDigitsToParse, final boolean isSigned, final int startingPosition) {
         final int min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
-        return min >= 1 && isSigned && isCharacterOperator(charAt(startingPosition)) && hasNextDigitCharacter(startingPosition);
+        final char currentCharacter = text.charAt(startingPosition);
+        final boolean isCharacterOperator = currentCharacter == '-' || currentCharacter == '+';
+        final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(text.charAt(startingPosition + 1));
+        return min >= 1 && isSigned && isCharacterOperator && hasNextDigitCharacter;
     }
 
-    private char charAt(int index) {
-        return text.charAt(index);
+    private int determineCurrentPosition(int startingPosition) {
+        int position = startingPosition;
+        if (startsWithSign) {
+            if (!negative) {
+                position = position + 1;
+            }
+        }
+        return position;
     }
 
-    private static boolean isCharacterOperator(final char currentCharacter) {
-        return currentCharacter == '-' || currentCharacter == '+';
-    }
-
-    private boolean hasNextDigitCharacter(int startingPosition) {
-        return startingPosition < text.length() - 1 && isDigitAt(startingPosition + 1);
-    }
-
-    private boolean isDigitAt(final int index) {
-        return Character.isDigit(charAt(index));
+    private int findLastIndexOfStringToParse(final CharSequence text, final int maximumDigitsToParse) {
+        final int lastIndex = startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse;
+        return Math.min(lastIndex, text.length() - getCurrentPosition());
     }
 
     private int calculateLength() {
         int length = startsWithSign ? 1 : 0;
-        while (length + 1 <= limit && isDigitAt(getCurrentPosition() + length)) {
+        while (length + 1 <= limit && Character.isDigit(text.charAt(getCurrentPosition() + length))) {
             length = length + 1;
         }
         return length;
-    }
-
-    private int getIndexOfFirstDigit() {
-        return isNegative() ? getCurrentPosition() + 1 : getCurrentPosition();
-    }
-
-    public boolean isNegative() {
-        return negative;
     }
 
     public int getCurrentPosition() {
         return currentPosition;
     }
 
-    private void addLengthToPosition() {
-        currentPosition = getCurrentPosition() + length;
-    }
-
-    private void invertPosition() {
-        currentPosition = ~getCurrentPosition();
-    }
-
-    private String getNumberAsString() {
-        return text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
-    }
-
-    private boolean hasMoreThanOneDigit() {
-        return (isNegative() ? getCurrentPosition() + 1 : getCurrentPosition()) < text.length();
-    }
-
     private int getAsciiCharacterFor(final int index) {
-        return charAt(index) - '0';
+        return text.charAt(index) - '0';
     }
 
     public int calculate() {
         final int length = this.length;
-        if (length == 0 || !hasMoreThanOneDigit()) {
+        final boolean doesNotHaveMoreThan1Digit = !((negative ? getCurrentPosition() + 1 : getCurrentPosition()) < text.length());
+        if (length == 0 || doesNotHaveMoreThan1Digit) {
             return handleFailure();
         } else if (length >= 9) {
             return defaultCalculate();
@@ -92,24 +70,24 @@ public final class NumericSequence {
     }
 
     private int handleFailure() {
-        invertPosition();
+        currentPosition = ~getCurrentPosition();
         return 0;
     }
     private int defaultCalculate() {
         // Since value may exceed integer limits, use stock parser
         // which checks for this.
-        final String toParse = getNumberAsString();
-        addLengthToPosition();
+        final String toParse = text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
+        currentPosition = getCurrentPosition() + length;
         return Integer.parseInt(toParse);
     }
 
     private int fastCalculate() {
-        int startingIndex = getIndexOfFirstDigit();
-        int calculated = getAsciiCharacterFor(startingIndex);
-        addLengthToPosition();
-        for (int i = startingIndex + 1; i < getCurrentPosition(); i++) {
+        int indexOfFirstDigit = negative ? getCurrentPosition() + 1 : getCurrentPosition();
+        int calculated = getAsciiCharacterFor(indexOfFirstDigit);
+        currentPosition = getCurrentPosition() + length;
+        for (int i = indexOfFirstDigit + 1; i < getCurrentPosition(); i++) {
             calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(i);
         }
-        return isNegative() ? -calculated : calculated;
+        return negative ? -calculated : calculated;
     }
 }
