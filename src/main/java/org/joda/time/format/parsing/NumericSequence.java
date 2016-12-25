@@ -48,7 +48,7 @@ public final class NumericSequence {
         return length;
     }
 
-    public int getIndexOfFirstDigit() {
+    private int getIndexOfFirstDigit() {
         return isNegative() ? getCurrentPosition() + 1 : getCurrentPosition();
     }
 
@@ -60,25 +60,56 @@ public final class NumericSequence {
         return currentPosition;
     }
 
-    public void addLengthToPosition() {
+    private void addLengthToPosition() {
         currentPosition = getCurrentPosition() + length;
     }
 
-    public void invertPosition() {
+    private void invertPosition() {
         currentPosition = ~getCurrentPosition();
     }
 
-    public String getNumberAsString() {
+    private String getNumberAsString() {
         return text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
     }
 
-    public boolean hasMoreThanOneDigit() {
+    private boolean hasMoreThanOneDigit() {
         return (isNegative() ? getCurrentPosition() + 1 : getCurrentPosition()) < text.length();
     }
 
-    public int getAsciiCharacterFor(final int index) {
+    private int getAsciiCharacterFor(final int index) {
         return charAt(index) - '0';
     }
 
-    public int getLength() { return length; }
+    public int calculate() {
+        final int length = this.length;
+        if (length == 0 || !hasMoreThanOneDigit()) {
+            return handleFailure();
+        } else if (length >= 9) {
+            return defaultCalculate();
+        } else {
+            return this.fastCalculate();
+        }
+    }
+
+    private int handleFailure() {
+        invertPosition();
+        return 0;
+    }
+    private int defaultCalculate() {
+        // Since value may exceed integer limits, use stock parser
+        // which checks for this.
+        final String toParse = getNumberAsString();
+        addLengthToPosition();
+        return Integer.parseInt(toParse);
+    }
+
+    private int fastCalculate() {
+        int startingIndex = getIndexOfFirstDigit();
+        int calculated = getAsciiCharacterFor(startingIndex);
+        addLengthToPosition();
+        for (int i = startingIndex + 1; i < getCurrentPosition(); i++) {
+            calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(i);
+        }
+        return isNegative() ? -calculated : calculated;
+    }
 }

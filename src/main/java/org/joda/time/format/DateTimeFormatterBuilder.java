@@ -1303,44 +1303,9 @@ public class DateTimeFormatterBuilder {
 
         public int parseInto(DateTimeParserBucket bucket, CharSequence text, int position) {
             final NumericSequence sequence = new NumericSequence(text, iMaxParsedDigits, iSigned, position);
-            bucket.saveField(iFieldType, calculate(sequence));
+            bucket.saveField(iFieldType, sequence.calculate());
             return sequence.getCurrentPosition();
         }
-
-        static int calculate(final NumericSequence sequence) {
-            final int length = sequence.getLength();
-            if (length == 0 || !sequence.hasMoreThanOneDigit()) {
-                return handleFailure(sequence);
-            } else if (length >= 9) {
-                return defaultCalculate(sequence);
-            } else {
-                return fastCalculate(sequence);
-            }
-        }
-
-        private static int handleFailure(final NumericSequence sequence) {
-            sequence.invertPosition();
-            return 0;
-        }
-
-        private static int defaultCalculate(final NumericSequence sequence) {
-            // Since value may exceed integer limits, use stock parser
-            // which checks for this.
-            final String toParse = sequence.getNumberAsString();
-            sequence.addLengthToPosition();
-            return Integer.parseInt(toParse);
-        }
-
-        private static int fastCalculate(final NumericSequence sequence) {
-            int startingIndex = sequence.getIndexOfFirstDigit();
-            int calculated = sequence.getAsciiCharacterFor(startingIndex);
-            sequence.addLengthToPosition();
-            for (int i = startingIndex + 1; i < sequence.getCurrentPosition(); i++) {
-                calculated = ((calculated << 3) + (calculated << 1)) + sequence.getAsciiCharacterFor(i);
-            }
-            return sequence.isNegative() ? -calculated : calculated;
-        }
-
     }
 
     //-----------------------------------------------------------------------
