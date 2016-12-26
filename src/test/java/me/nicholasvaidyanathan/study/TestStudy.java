@@ -16,6 +16,8 @@ public class TestStudy extends TestCase {
 
     /**
      * https://github.com/JodaOrg/joda-time/issues/86
+     * NOTE: This test does not pass at the beginning of the study.
+     * It is expected to pass with the correct fix.
      */
     public void test_fix_issues_86_correctly_parses_plus_in_front_of_year_for_yyyyMMdd() {
         // Given: a DatetimeFormatter for an expected pattern like 20130109
@@ -36,6 +38,8 @@ public class TestStudy extends TestCase {
 
     /**
      * https://github.com/JodaOrg/joda-time/issues/86
+     * NOTE: This test does not pass at the beginning of the study.
+     * It is expected to pass with the correct fix.
      */
     public void test_fix_issues_86_correctly_parses_plus_in_front_of_year_for_MMyyyydd() {
         // Given: a DatetimeFormatter for an expected pattern like 01201309
@@ -52,6 +56,8 @@ public class TestStudy extends TestCase {
 
     /**
      * https://github.com/JodaOrg/joda-time/issues/86
+     * NOTE: This test PASSES at the beginning of the study.
+     * It is expected to CONTINUE TO PASS with the correct fix.
      */
     public void test_fix_issues_86_correctly_parses_plus_in_front_of_year_for_MM_yyyy_dd() {
         // Given: a DatetimeFormatter for an expected pattern like 01-2013-09
@@ -68,6 +74,8 @@ public class TestStudy extends TestCase {
 
     /**
      * https://github.com/JodaOrg/joda-time/issues/86
+     * NOTE: This test does not pass at the beginning of the study.
+     * It is expected to pass with the correct fix.
      */
     public void test_fix_issues_86_correctly_parses_plus_in_front_of_year_for_yyyydd() {
         // Given: a DatetimeFormatter for an expected pattern like 201309
