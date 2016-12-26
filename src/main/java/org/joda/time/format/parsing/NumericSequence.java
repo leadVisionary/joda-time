@@ -20,10 +20,14 @@ public final class NumericSequence {
 
     private boolean isPrefixedWithPlusOrMinus(final int maximumDigitsToParse, final boolean isSigned, final int startingPosition) {
         final int min = Math.min(maximumDigitsToParse, text.length() - startingPosition);
-        final char currentCharacter = text.charAt(startingPosition);
-        final boolean isCharacterOperator = currentCharacter == '-' || currentCharacter == '+';
-        final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(text.charAt(startingPosition + 1));
-        return min >= 1 && isSigned && isCharacterOperator && hasNextDigitCharacter;
+        if (min <= 1 || !isSigned) {
+            return false;
+        } else {
+            final char currentCharacter = text.charAt(startingPosition);
+            final boolean isCharacterOperator = currentCharacter == '-' || currentCharacter == '+';
+            final boolean hasNextDigitCharacter = startingPosition < text.length() - 1 && Character.isDigit(text.charAt(startingPosition + 1));
+            return isCharacterOperator && hasNextDigitCharacter;
+        }
     }
 
     private int determineCurrentPosition(int startingPosition) {
