@@ -1395,6 +1395,7 @@ public class DateTimeFormatterBuilder {
         @Override
         public int parseInto(DateTimeParserBucket bucket, CharSequence text, int position) {
             int newPos = super.parseInto(bucket, text, position);
+            System.out.println("current pos = " + newPos);
             if (newPos < 0) {
                 return newPos;
             }

@@ -33,15 +33,16 @@ public final class NumericSequence {
     private int determineCurrentPosition(int startingPosition) {
         int position = startingPosition;
         if (startsWithSign) {
-            if (!negative) {
+            position = position + 1;
+            /*if (!negative) {
                 position = position + 1;
-            }
+            }*/
         }
         return position;
     }
 
     private int findLastIndexOfStringToParse(final CharSequence text, final int maximumDigitsToParse) {
-        final int lastIndex = startsWithSign ? maximumDigitsToParse : maximumDigitsToParse;
+        final int lastIndex = startsWithSign ? maximumDigitsToParse + 1: maximumDigitsToParse;
         return Math.min(lastIndex, text.length() - getCurrentPosition());
     }
 
