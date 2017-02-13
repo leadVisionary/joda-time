@@ -33,16 +33,16 @@ public final class NumericSequence {
     private int determineCurrentPosition(int startingPosition) {
         int position = startingPosition;
         if (startsWithSign) {
-            if (!negative) {
+            //if (!negative) {
                 position = position + 1;
-            }
+            //}
         }
         return position;
     }
 
     private int findLastIndexOfStringToParse(final CharSequence text, final int maximumDigitsToParse) {
-        final int lastIndex = startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse;
-        return Math.min(lastIndex, text.length() - getCurrentPosition());
+        //final int lastIndex = startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse;
+        return Math.min(maximumDigitsToParse, text.length() - getCurrentPosition());
     }
 
     private int calculateLength() {
@@ -63,7 +63,8 @@ public final class NumericSequence {
 
     public int calculate() {
         final int length = this.length;
-        final boolean doesNotHaveMoreThan1Digit = !((negative ? getCurrentPosition() + 1 : getCurrentPosition()) < text.length());
+        //final boolean doesNotHaveMoreThan1Digit = !((negative ? getCurrentPosition() + 1 : getCurrentPosition()) < text.length());
+        final boolean doesNotHaveMoreThan1Digit = !(getCurrentPosition() < text.length());
         if (length == 0 || doesNotHaveMoreThan1Digit) {
             return handleFailure();
         } else if (length >= 9) {
@@ -82,11 +83,14 @@ public final class NumericSequence {
         // which checks for this.
         final String toParse = text.subSequence(getCurrentPosition(), getCurrentPosition() + length).toString();
         currentPosition = getCurrentPosition() + length;
-        return Integer.parseInt(toParse);
+
+        //return Integer.parseInt(toParse);
+        return (negative ? -1 : 1) * Integer.parseInt(toParse);
+
     }
 
     private int fastCalculate() {
-        int indexOfFirstDigit = negative ? getCurrentPosition() + 1 : getCurrentPosition();
+        int indexOfFirstDigit = /*negative ? getCurrentPosition() + 1 :*/ getCurrentPosition();
         int calculated = getAsciiCharacterFor(indexOfFirstDigit);
         currentPosition = getCurrentPosition() + length;
         for (int i = indexOfFirstDigit + 1; i < getCurrentPosition(); i++) {
