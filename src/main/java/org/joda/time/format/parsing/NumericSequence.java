@@ -41,7 +41,13 @@ public final class NumericSequence {
     }
 
     private int findLastIndexOfStringToParse(final CharSequence text, final int maximumDigitsToParse) {
-        final int lastIndex = startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse;
+        //final int lastIndex = startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse;
+        final int lastIndex;
+        if (startsWithSign && negative) {
+            lastIndex = startsWithSign ? maximumDigitsToParse + 1 : maximumDigitsToParse;
+        } else {
+            lastIndex = startsWithSign ? maximumDigitsToParse : maximumDigitsToParse;
+        }
         return Math.min(lastIndex, text.length() - getCurrentPosition());
     }
 
