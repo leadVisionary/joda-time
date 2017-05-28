@@ -11,8 +11,7 @@ public final class LocalDateTimeParsingStrategy extends FormatterParsingStrategy
         super(formatter);
     }
 
-    protected LocalDateTime doParse(final CharSequence text) {
-        long millis = bucket.computeMillis(true, text);
+    protected LocalDateTime convertToOutputType(long computedBucketResult) {
         Chronology chrono = bucket.getChronology();
         if (bucket.getOffsetInteger() != null) {  // treat withOffsetParsed() as being true
             int parsedOffset = bucket.getOffsetInteger();
@@ -21,6 +20,6 @@ public final class LocalDateTimeParsingStrategy extends FormatterParsingStrategy
         } else if (bucket.getZone() != null) {
             chrono = chrono.withZone(bucket.getZone());
         }
-        return new LocalDateTime(millis, chrono);
+        return new LocalDateTime(computedBucketResult, chrono);
     }
 }

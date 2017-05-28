@@ -20,11 +20,11 @@ abstract class FormatterParsingStrategy<T> implements ParsingStrategy<T> {
         }
         int newPos = parser.parseInto(bucket, text.toString(), 0);
         if (newPos >= 0 && newPos >= text.length()) {
-            return doParse(text);
+            return convertToOutputType(bucket.computeMillis(true, text));
         } else {
             throw new IllegalArgumentException(FormatUtils.createErrorMessage(text.toString(), ~newPos));
         }
     }
 
-    protected abstract T doParse(CharSequence text);
+    protected abstract T convertToOutputType(long computedBucketResult);
 }

@@ -8,7 +8,7 @@ public final class MillsecondParsingStrategy extends FormatterParsingStrategy<Lo
         super(formatter);
     }
 
-    protected Long doParse(final CharSequence text) {
-        return bucket.computeMillis(true, text);
+    protected Long convertToOutputType(long computedBucketResult) {
+        return computedBucketResult;
     }
 }
