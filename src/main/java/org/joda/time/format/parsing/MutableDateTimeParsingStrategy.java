@@ -9,8 +9,8 @@ public final class MutableDateTimeParsingStrategy extends FormatterParsingStrate
         super(formatter);
     }
 
-    public MutableDateTime doParse(final CharSequence text) {
-        MutableDateTime dt = new MutableDateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(formatter.isOffsetParsed()));
+    public MutableDateTime convertToOutputType(long computedBucketResult) {
+        MutableDateTime dt = new MutableDateTime(computedBucketResult, bucket.getBucketChronology(formatter.isOffsetParsed()));
         if (formatter.getZone() != null) {
             dt.setZone(formatter.getZone());
         }

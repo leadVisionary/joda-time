@@ -8,8 +8,8 @@ public final class DateTimeParsingStrategy extends FormatterParsingStrategy<Date
         super(formatter);
     }
 
-    protected DateTime doParse(final CharSequence text) {
-        DateTime dt = new DateTime(bucket.computeMillis(true, text), bucket.getBucketChronology(formatter.isOffsetParsed()));
+    protected DateTime convertToOutputType(long computedBucketResult) {
+        DateTime dt = new DateTime(computedBucketResult, bucket.getBucketChronology(formatter.isOffsetParsed()));
         if (formatter.getZone() != null) {
             dt = dt.withZone(formatter.getZone());
         }
