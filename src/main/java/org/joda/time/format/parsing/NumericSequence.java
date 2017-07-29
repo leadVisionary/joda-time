@@ -50,6 +50,8 @@ public final class NumericSequence {
         while (length + 1 <= limit && Character.isDigit(text.charAt(getCurrentPosition() + length))) {
             length = length + 1;
         }
+
+        length = startsWithSign ? length - 1 : length;
         return length;
     }
 
@@ -86,9 +88,11 @@ public final class NumericSequence {
     }
 
     private int fastCalculate() {
+        boolean changed = false;
+        int desiredValue = changed ? 4 : length;
         int indexOfFirstDigit = negative ? getCurrentPosition() + 1 : getCurrentPosition();
         int calculated = getAsciiCharacterFor(indexOfFirstDigit);
-        currentPosition = getCurrentPosition() + length;
+        currentPosition = getCurrentPosition() + desiredValue;
         for (int i = indexOfFirstDigit + 1; i < getCurrentPosition(); i++) {
             calculated = ((calculated << 3) + (calculated << 1)) + getAsciiCharacterFor(i);
         }
