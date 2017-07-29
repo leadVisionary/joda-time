@@ -4,6 +4,7 @@ public final class NumericSequence {
     private final CharSequence text;
     private final boolean startsWithSign;
     private final boolean negative;
+    private final boolean explicitPositive;
     private final int limit;
     private final int length;
 
@@ -13,6 +14,7 @@ public final class NumericSequence {
         this.text = text;
         startsWithSign = isPrefixedWithPlusOrMinus(maximumDigitsToParse, isSigned, startingPosition);
         negative = startsWithSign && text.charAt(startingPosition) == '-';
+        this.explicitPositive = startsWithSign && text.charAt(startingPosition) == '+';
         currentPosition = determineCurrentPosition(startingPosition);
         limit = findLastIndexOfStringToParse(text, maximumDigitsToParse);
         length = calculateLength();
@@ -33,7 +35,7 @@ public final class NumericSequence {
     private int determineCurrentPosition(int startingPosition) {
         int position = startingPosition;
         if (startsWithSign) {
-            if (!negative) {
+            if (!(negative || explicitPositive)) {
                 position = position + 1;
             }
         }
@@ -86,7 +88,7 @@ public final class NumericSequence {
     }
 
     private int fastCalculate() {
-        int indexOfFirstDigit = negative ? getCurrentPosition() + 1 : getCurrentPosition();
+        int indexOfFirstDigit = negative || explicitPositive ? getCurrentPosition() + 1 : getCurrentPosition();
         int calculated = getAsciiCharacterFor(indexOfFirstDigit);
         currentPosition = getCurrentPosition() + length;
         for (int i = indexOfFirstDigit + 1; i < getCurrentPosition(); i++) {
