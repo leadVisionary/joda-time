@@ -873,7 +873,10 @@ public class DateTimeFormatter {
      */
     public DateTime parseDateTime(String text) {
         InternalParser parser = requireParser();
-        
+
+        if (text.contains("+")) {
+            text = text.replace("+", "");
+        }
         Chronology chrono = selectChronology(null);
         DateTimeParserBucket bucket = new DateTimeParserBucket(0, chrono, iLocale, iPivotYear, iDefaultYear);
         int newPos = parser.parseInto(bucket, text, 0);
